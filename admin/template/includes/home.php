@@ -10,18 +10,24 @@
 
     <?php
     // Admin Navbar akan mengandung tombol toggle sidebar
-    include __DIR__ . '/../includes/admin_navbar.php';
+    // Path relatif dari home.php ke admin_navbar.php
+    include __DIR__ . '/admin_navbar.php';
     ?>
 
     <?php
     // Sidebar utama
-    include __DIR__ . '/../includes/admin_sidebar.php';
+    // Path relatif dari home.php ke admin_sidebar.php
+    include __DIR__ . '/admin_sidebar.php';
     ?>
 
-    <div class="p-4 sm:ml-64"> <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14"> <?php
-            // Konten modul akan dimuat di sini
-            if (isset($content_path) && file_exists(ADMIN_ROOT_PATH . '/' . $content_path)) {
-                include ADMIN_ROOT_PATH . '/' . $content_path;
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+            <?php
+            // Konten modul atau dashboard akan dimuat di sini
+            // Perhatikan bahwa $content_view_file didefinisikan di router (index.php)
+            // dan merupakan path RELATIF dari ADMIN_PATH.
+            if (isset($content_view_file) && file_exists(ADMIN_PATH . '/' . $content_view_file)) {
+                include ADMIN_PATH . '/' . $content_view_file;
             } else {
                 echo '<p class="text-center text-gray-700 dark:text-gray-300">Konten tidak ditemukan atau sedang dalam pengembangan.</p>';
             }
@@ -31,7 +37,8 @@
 
     <?php
     // Admin Footer
-    include __DIR__ . '/../includes/admin_footer.php';
+    // Path relatif dari home.php ke admin_footer.php
+    include __DIR__ . '/admin_footer.php';
     ?>
 
     <script src="/web-kasir-new/node_modules/flowbite/dist/flowbite.min.js"></script>
