@@ -131,4 +131,3 @@ if (isset($_GET['clear_laporan'])) { // Menggunakan 'clear_laporan' sebagai para
 // Catatan:
 // - Bagian untuk menghapus kategori dihilangkan karena skema SQL Anda
 //   tidak memiliki tabel 'kategori' terpisah. Kolom 'kategori' ada di tabel 'produk'.
-?>

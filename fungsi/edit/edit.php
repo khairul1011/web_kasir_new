@@ -212,5 +212,3 @@ if (isset($_GET['keranjang_qty'])) { // Menggunakan 'keranjang_qty' untuk menghi
 //   tidak memiliki kolom 'gambar'.
 // - Bagian 'cari_barang' dihilangkan karena ini adalah logika tampilan/pencarian,
 //   bukan operasi edit, dan lebih cocok di file 'view.php' atau file terpisah.
-
-?>

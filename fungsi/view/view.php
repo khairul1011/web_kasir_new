@@ -406,4 +406,99 @@ class View
         $hasil = $row->fetch();
         return $hasil;
     }
+
+    /**
+     * Mengambil semua data produk dengan pagination.
+     *
+     * @param int $limit Jumlah produk per halaman.
+     * @param int $offset Offset (mulai dari item ke berapa).
+     * @return array Hasil query dalam bentuk array.
+     */
+    public function produk_pagination($limit, $offset)
+    {
+        // PERBAIKAN KRITIS: Sisipkan $limit dan $offset langsung ke query
+        // Pastikan nilai sudah divalidasi sebagai integer sebelum mencapai sini
+        // (yang sudah kita lakukan di modules/barang/index.php)
+        $sql = "SELECT * FROM produk ORDER BY id DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        $row = $this->db->prepare($sql);
+        $row->execute(); // Tidak ada parameter di sini karena sudah disisipkan
+        $hasil = $row->fetchAll();
+        return $hasil;
+    }
+
+    /**
+     * Menghitung total jumlah produk untuk keperluan pagination.
+     *
+     * @return int Total jumlah produk.
+     */
+    public function produk_row_count_total()
+    {
+        $sql = "SELECT COUNT(*) FROM produk";
+        $row = $this->db->prepare($sql);
+        $row->execute();
+        $hasil = $row->fetchColumn();
+        return $hasil;
+    }
+
+    /**
+     * Menghitung jumlah total pelanggan.
+     *
+     * @return int Jumlah total pelanggan.
+     */
+    public function pelanggan_row_count()
+    {
+        $sql = "SELECT COUNT(*) FROM pelanggan";
+        $row = $this->db->prepare($sql);
+        $row->execute();
+        $hasil = $row->fetchColumn();
+        return $hasil;
+    }
+
+    /**
+     * Mengambil data produk dengan pagination, termasuk pencarian.
+     *
+     * @param int $limit Jumlah produk per halaman.
+     * @param int $offset Offset (mulai dari item ke berapa).
+     * @param string|null $cari Kata kunci pencarian opsional.
+     * @return array Hasil query dalam bentuk array.
+     */
+    public function produk_pagination_with_search($limit, $offset, $cari = null)
+    {
+        $sql = "SELECT * FROM produk ";
+        $params = [];
+        if ($cari) {
+            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? "; // Tambahkan id ke pencarian
+            $param_like = "%{$cari}%";
+            $params = [$param_like, $param_like, $param_like, $param_like];
+        }
+        $sql .= "ORDER BY id DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        
+        $row = $this->db->prepare($sql);
+        $row->execute($params);
+        $hasil = $row->fetchAll();
+        return $hasil;
+    }
+
+    /**
+     * Menghitung total jumlah produk untuk keperluan pagination, termasuk pencarian.
+     *
+     * @param string|null $cari Kata kunci pencarian opsional.
+     * @return int Total jumlah produk.
+     */
+    public function produk_row_count_total_with_search($cari = null)
+    {
+        $sql = "SELECT COUNT(*) FROM produk ";
+        $params = [];
+        if ($cari) {
+            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? "; // Tambahkan id ke pencarian
+            $param_like = "%{$cari}%";
+            $params = [$param_like, $param_like, $param_like, $param_like];
+        }
+        
+        $row = $this->db->prepare($sql);
+        $row->execute($params);
+        $hasil = $row->fetchColumn();
+        return $hasil;
+    }
+
 }
