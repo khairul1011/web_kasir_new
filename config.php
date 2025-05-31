@@ -26,4 +26,3 @@ try {
     // Tangani error koneksi database
     die("Koneksi database gagal: " . $e->getMessage());
 }
-?>
