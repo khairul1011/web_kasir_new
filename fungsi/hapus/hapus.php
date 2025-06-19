@@ -128,6 +128,83 @@ if (isset($_GET['clear_laporan'])) { // Menggunakan 'clear_laporan' sebagai para
     }
 }
 
+// --- FUNGSI BARU UNTUK HALAMAN TRANSAKSI ---
+
+// Hapus Item dari Keranjang (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['keranjang_item'])) {
+    $keranjang_item_id = (int)sanitize_input($_GET['id']); // ID item di tabel keranjang
+
+    // Ambil produk_id dan qty dari item keranjang yang akan dihapus
+    $sql_get_item_info = 'SELECT produk_id, qty FROM keranjang WHERE id=?';
+    $row_get_item_info = $db->prepare($sql_get_item_info);
+    $row_get_item_info->execute(array($keranjang_item_id));
+    $item_info = $row_get_item_info->fetch();
+
+    if ($item_info) {
+        $produk_id_terkait = $item_info['produk_id'];
+        $qty_dikembalikan = $item_info['qty'];
+
+        try {
+            $db->beginTransaction(); // Mulai transaksi database
+
+            // Hapus item dari tabel 'keranjang'
+            $sql_delete_keranjang = 'DELETE FROM keranjang WHERE id=?';
+            $row_delete_keranjang = $db->prepare($sql_delete_keranjang);
+            $row_delete_keranjang->execute(array($keranjang_item_id));
+
+            // Kembalikan stok produk
+            $sql_update_stok = 'UPDATE produk SET stok = stok + ? WHERE id=?';
+            $row_update_stok = $db->prepare($sql_update_stok);
+            $row_update_stok->execute(array($qty_dikembalikan, $produk_id_terkait));
+
+            $db->commit(); // Commit transaksi
+            echo json_encode(['status' => 'success', 'message' => 'Item berhasil dihapus dari keranjang.']);
+        } catch (PDOException $e) {
+            $db->rollBack(); // Rollback transaksi jika error
+            error_log("Error deleting cart item: " . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus item dari keranjang: ' . $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Item keranjang tidak ditemukan!']);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
+// Reset Keranjang untuk User Tertentu (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['clear_keranjang_by_user'])) {
+    $user_id = (int)sanitize_input($_POST['user_id']); // ID user dari form
+
+    try {
+        $db->beginTransaction(); // Mulai transaksi untuk memastikan konsistensi data
+
+        // Ambil semua item di keranjang user ini untuk mengembalikan stok
+        $sql_get_user_keranjang = 'SELECT produk_id, qty FROM keranjang WHERE user_id = ?';
+        $row_get_user_keranjang = $db->prepare($sql_get_user_keranjang);
+        $row_get_user_keranjang->execute([$user_id]);
+        $user_items = $row_get_user_keranjang->fetchAll();
+
+        foreach ($user_items as $item) {
+            $sql_update_stok = 'UPDATE produk SET stok = stok + ? WHERE id=?';
+            $row_update_stok = $db->prepare($sql_update_stok);
+            $row_update_stok->execute(array($item['qty'], $item['produk_id']));
+        }
+
+        // Hapus semua data dari tabel 'keranjang' untuk user ini
+        $sql_clear_keranjang = 'DELETE FROM keranjang WHERE user_id = ?';
+        $row_clear_keranjang = $db->prepare($sql_clear_keranjang);
+        $row_clear_keranjang->execute([$user_id]);
+
+        $db->commit(); // Commit transaksi
+
+        echo json_encode(['status' => 'success', 'message' => 'Keranjang berhasil direset.']);
+    } catch (PDOException $e) {
+        $db->rollBack(); // Rollback transaksi jika terjadi error
+        error_log("Error clearing user cart: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mereset keranjang: ' . $e->getMessage()]);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
 // Catatan:
 // - Bagian untuk menghapus kategori dihilangkan karena skema SQL Anda
 //   tidak memiliki tabel 'kategori' terpisah. Kolom 'kategori' ada di tabel 'produk'.

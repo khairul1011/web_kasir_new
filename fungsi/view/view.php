@@ -455,7 +455,8 @@ class View
     }
 
     /**
-     * Mengambil data produk dengan pagination, termasuk pencarian.
+     * Mengambil semua data produk dengan pagination dan pencarian.
+     * Digunakan juga di halaman transaksi untuk mencari produk.
      *
      * @param int $limit Jumlah produk per halaman.
      * @param int $offset Offset (mulai dari item ke berapa).
@@ -467,7 +468,7 @@ class View
         $sql = "SELECT * FROM produk ";
         $params = [];
         if ($cari) {
-            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? "; // Tambahkan id ke pencarian
+            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? ";
             $param_like = "%{$cari}%";
             $params = [$param_like, $param_like, $param_like, $param_like];
         }
@@ -480,7 +481,7 @@ class View
     }
 
     /**
-     * Menghitung total jumlah produk untuk keperluan pagination, termasuk pencarian.
+     * Menghitung total jumlah produk untuk keperluan pagination dan pencarian.
      *
      * @param string|null $cari Kata kunci pencarian opsional.
      * @return int Total jumlah produk.
@@ -490,7 +491,7 @@ class View
         $sql = "SELECT COUNT(*) FROM produk ";
         $params = [];
         if ($cari) {
-            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? "; // Tambahkan id ke pencarian
+            $sql .= "WHERE nama LIKE ? OR kategori LIKE ? OR deskripsi LIKE ? OR id LIKE ? ";
             $param_like = "%{$cari}%";
             $params = [$param_like, $param_like, $param_like, $param_like];
         }
@@ -501,4 +502,75 @@ class View
         return $hasil;
     }
 
+    // --- FUNGSI BARU UNTUK HALAMAN TRANSAKSI ---
+
+    /**
+     * Mengambil item-item di keranjang untuk user tertentu.
+     * Join dengan tabel produk untuk detail produk.
+     *
+     * @param int $user_id ID user/kasir yang sedang login.
+     * @return array Daftar item di keranjang.
+     */
+    public function get_keranjang_items($user_id)
+    {
+        $sql = "SELECT k.id AS keranjang_id, k.produk_id, k.qty,
+                       p.nama AS nama_produk, p.harga AS harga_produk, p.stok AS stok_produk
+                FROM keranjang k
+                JOIN produk p ON k.produk_id = p.id
+                WHERE k.user_id = ?";
+        $row = $this->db->prepare($sql);
+        $row->execute([$user_id]);
+        $hasil = $row->fetchAll();
+        return $hasil;
+    }
+
+    /**
+     * Menghitung total harga di keranjang untuk user tertentu.
+     *
+     * @param int $user_id ID user/kasir yang sedang login.
+     * @return float|int Total harga di keranjang.
+     */
+    public function get_keranjang_total($user_id)
+    {
+        $sql = "SELECT SUM(k.qty * p.harga) AS total_keranjang
+                FROM keranjang k
+                JOIN produk p ON k.produk_id = p.id
+                WHERE k.user_id = ?";
+        $row = $this->db->prepare($sql);
+        $row->execute([$user_id]);
+        $hasil = $row->fetch();
+        return $hasil['total_keranjang'] ?? 0;
+    }
+    
+    /**
+     * Mengambil semua data pelanggan.
+     * @return array Daftar pelanggan.
+     */
+    public function get_all_pelanggan()
+    {
+        $sql = "SELECT * FROM pelanggan ORDER BY nama ASC";
+        $row = $this->db->prepare($sql);
+        $row->execute();
+        $hasil = $row->fetchAll();
+        return $hasil;
+    }
+
+    /**
+     * Mengambil detail transaksi berdasarkan ID transaksi.
+     *
+     * @param int $transaksi_id ID transaksi.
+     * @return array Detail transaksi.
+     */
+    public function get_detail_transaksi($transaksi_id)
+    {
+        $sql = "SELECT dt.id, dt.qty, dt.subtotal,
+                       p.nama AS nama_produk, p.harga AS harga_satuan
+                FROM detail_transaksi dt
+                JOIN produk p ON dt.produk_id = p.id
+                WHERE dt.transaksi_id = ?";
+        $row = $this->db->prepare($sql);
+        $row->execute([$transaksi_id]);
+        $hasil = $row->fetchAll();
+        return $hasil;
+    }
 }

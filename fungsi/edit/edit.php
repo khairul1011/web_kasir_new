@@ -205,6 +205,208 @@ if (isset($_GET['keranjang_qty'])) { // Menggunakan 'keranjang_qty' untuk menghi
     }
 }
 
+// --- FUNGSI BARU UNTUK HALAMAN TRANSAKSI ---
+
+// Edit Kuantitas Item di Keranjang (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['keranjang_qty'])) {
+    $keranjang_item_id = (int)sanitize_input($_POST['keranjang_item_id']); // ID item di tabel keranjang
+    $produk_id_keranjang = (int)sanitize_input($_POST['produk_id']); // ID produk yang terkait dengan item keranjang
+    $jumlah_baru = (int)sanitize_input($_POST['qty_baru']); // Kuantitas baru yang diinginkan
+
+    try {
+        $db->beginTransaction(); // Mulai transaksi database
+
+        // Ambil informasi stok produk dan kuantitas saat ini di keranjang
+        $sql_get_info = "SELECT p.stok, k.qty
+                         FROM produk p
+                         JOIN keranjang k ON p.id = k.produk_id
+                         WHERE k.id = ?";
+        $row_get_info = $db->prepare($sql_get_info);
+        $row_get_info->execute(array($keranjang_item_id));
+        $info_item = $row_get_info->fetch();
+
+        if ($info_item) {
+            $stok_produk_saat_ini = $info_item['stok'];
+            $qty_lama = $info_item['qty'];
+
+            // Hitung selisih stok yang perlu disesuaikan
+            $selisih_qty = $jumlah_baru - $qty_lama;
+
+            // Periksa apakah stok cukup untuk penambahan kuantitas
+            if ($stok_produk_saat_ini - $selisih_qty >= 0) {
+                // Update kuantitas di keranjang
+                $sql_update_qty_keranjang = 'UPDATE keranjang SET qty=? WHERE id=?';
+                $row_update_qty_keranjang = $db->prepare($sql_update_qty_keranjang);
+                $row_update_qty_keranjang->execute(array($jumlah_baru, $keranjang_item_id));
+
+                // Sesuaikan stok produk di tabel produk
+                $sql_update_stok_produk = 'UPDATE produk SET stok = stok - ? WHERE id=?';
+                $row_update_stok_produk = $db->prepare($sql_update_stok_produk);
+                $row_update_stok_produk->execute(array($selisih_qty, $produk_id_keranjang));
+
+                $db->commit(); // Commit transaksi
+                echo json_encode(['status' => 'success', 'message' => 'Kuantitas keranjang berhasil diperbarui.']);
+            } else {
+                throw new Exception("Jumlah melebihi stok produk yang tersedia!");
+            }
+        } else {
+            throw new Exception("Item keranjang tidak ditemukan!");
+        }
+    } catch (Exception $e) {
+        $db->rollBack(); // Rollback transaksi jika terjadi error
+        error_log("Error updating cart quantity: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
+// --- FUNGSI BARU UNTUK HALAMAN TRANSAKSI (Diadaptasi dari update_qty lama) ---
+
+// Edit Kuantitas Item di Keranjang (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['keranjang_qty'])) {
+    // Pastikan ini adalah permintaan POST dari form
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['status' => 'error', 'message' => 'Metode permintaan tidak valid.']);
+        exit;
+    }
+
+    $keranjang_item_id = (int)sanitize_input($_POST['keranjang_item_id']); // ID item di tabel keranjang
+    $produk_id_keranjang = (int)sanitize_input($_POST['produk_id']); // ID produk yang terkait dengan item keranjang
+    $jumlah_baru = (int)sanitize_input($_POST['qty_baru']); // Kuantitas baru yang diinginkan
+
+    try {
+        $db->beginTransaction(); // Mulai transaksi database
+
+        // Ambil informasi stok produk dan kuantitas saat ini di keranjang
+        $sql_get_info = "SELECT p.stok, k.qty
+                         FROM produk p
+                         JOIN keranjang k ON p.id = k.produk_id
+                         WHERE k.id = ?";
+        $row_get_info = $db->prepare($sql_get_info);
+        $row_get_info->execute(array($keranjang_item_id));
+        $info_item = $row_get_info->fetch();
+
+        if ($info_item) {
+            $stok_produk_saat_ini = $info_item['stok'];
+            $qty_lama = $info_item['qty'];
+
+            // Hitung selisih stok yang perlu disesuaikan
+            $selisih_qty = $jumlah_baru - $qty_lama;
+
+            // Periksa apakah stok cukup untuk penambahan kuantitas
+            // Stok yang tersedia adalah stok_produk_saat_ini dikurangi selisih_qty
+            // Jika selisih_qty positif (menambah qty di keranjang), stok_produk_saat_ini harus cukup
+            // Jika selisih_qty negatif (mengurangi qty di keranjang), stok_produk_saat_ini akan bertambah
+            if ($stok_produk_saat_ini - $selisih_qty < 0) {
+                throw new Exception("Stok produk tidak mencukupi untuk kuantitas yang diminta.");
+            }
+
+            // Update kuantitas di keranjang
+            $sql_update_qty_keranjang = 'UPDATE keranjang SET qty=? WHERE id=?';
+            $row_update_qty_keranjang = $db->prepare($sql_update_qty_keranjang);
+            $row_update_qty_keranjang->execute(array($jumlah_baru, $keranjang_item_id));
+
+            // Sesuaikan stok produk di tabel produk
+            $sql_update_stok_produk = 'UPDATE produk SET stok = stok - ? WHERE id=?';
+            $row_update_stok_produk = $db->prepare($sql_update_stok_produk);
+            $row_update_stok_produk->execute(array($selisih_qty, $produk_id_keranjang));
+
+            $db->commit(); // Commit transaksi
+            echo json_encode(['status' => 'success', 'message' => 'Kuantitas keranjang berhasil diperbarui.']);
+        } else {
+            throw new Exception("Item keranjang tidak ditemukan!");
+        }
+    } catch (Exception $e) {
+        $db->rollBack(); // Rollback transaksi jika terjadi error
+        error_log("Error updating cart quantity: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
+// --- FUNGSI BARU UNTUK HALAMAN TRANSAKSI (Diadaptasi dari delete_keranjang.php lama) ---
+
+// Hapus Item dari Keranjang (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['keranjang_item'])) {
+    $keranjang_item_id = (int)sanitize_input($_GET['id']); // ID item di tabel keranjang
+
+    // Ambil produk_id dan qty dari item keranjang yang akan dihapus
+    $sql_get_item_info = 'SELECT produk_id, qty FROM keranjang WHERE id=?';
+    $row_get_item_info = $db->prepare($sql_get_item_info);
+    $row_get_item_info->execute(array($keranjang_item_id));
+    $item_info = $row_get_item_info->fetch();
+
+    if ($item_info) {
+        $produk_id_terkait = $item_info['produk_id'];
+        $qty_dikembalikan = $item_info['qty'];
+
+        try {
+            $db->beginTransaction(); // Mulai transaksi database
+
+            // Hapus item dari tabel 'keranjang'
+            $sql_delete_keranjang = 'DELETE FROM keranjang WHERE id=?';
+            $row_delete_keranjang = $db->prepare($sql_delete_keranjang);
+            $row_delete_keranjang->execute(array($keranjang_item_id));
+
+            // Kembalikan stok produk
+            $sql_update_stok = 'UPDATE produk SET stok = stok + ? WHERE id=?';
+            $row_update_stok = $db->prepare($sql_update_stok);
+            $row_update_stok->execute(array($qty_dikembalikan, $produk_id_terkait));
+
+            $db->commit(); // Commit transaksi
+            echo json_encode(['status' => 'success', 'message' => 'Item berhasil dihapus dari keranjang.']);
+        } catch (PDOException $e) {
+            $db->rollBack(); // Rollback transaksi jika error
+            error_log("Error deleting cart item: " . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus item dari keranjang: ' . $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Item keranjang tidak ditemukan!']);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
+// Reset Keranjang untuk User Tertentu (Dipanggil dari AJAX di halaman jual)
+if (isset($_GET['clear_keranjang_by_user'])) {
+    // Pastikan ini adalah permintaan POST dari form
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['status' => 'error', 'message' => 'Metode permintaan tidak valid.']);
+        exit;
+    }
+
+    $user_id = (int)sanitize_input($_POST['user_id']); // ID user dari form
+
+    try {
+        $db->beginTransaction(); // Mulai transaksi untuk memastikan konsistensi data
+
+        // Ambil semua item di keranjang user ini untuk mengembalikan stok
+        $sql_get_user_keranjang = 'SELECT produk_id, qty FROM keranjang WHERE user_id = ?';
+        $row_get_user_keranjang = $db->prepare($sql_get_user_keranjang);
+        $row_get_user_keranjang->execute([$user_id]);
+        $user_items = $row_get_user_keranjang->fetchAll();
+
+        foreach ($user_items as $item) {
+            $sql_update_stok = 'UPDATE produk SET stok = stok + ? WHERE id=?';
+            $row_update_stok = $db->prepare($sql_update_stok);
+            $row_update_stok->execute(array($item['qty'], $item['produk_id']));
+        }
+
+        // Hapus semua data dari tabel 'keranjang' untuk user ini
+        $sql_clear_keranjang = 'DELETE FROM keranjang WHERE user_id = ?';
+        $row_clear_keranjang = $db->prepare($sql_clear_keranjang);
+        $row_clear_keranjang->execute([$user_id]);
+
+        $db->commit(); // Commit transaksi
+
+        echo json_encode(['status' => 'success', 'message' => 'Keranjang berhasil direset.']);
+    } catch (PDOException $e) {
+        $db->rollBack(); // Rollback transaksi jika terjadi error
+        error_log("Error clearing user cart: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mereset keranjang: ' . $e->getMessage()]);
+    }
+    exit; // Penting: Hentikan eksekusi setelah mengirim JSON
+}
+
 // Catatan:
 // - Bagian untuk mengedit kategori dihilangkan karena skema SQL Anda
 //   tidak memiliki tabel 'kategori' terpisah. Kolom 'kategori' ada di tabel 'produk'.

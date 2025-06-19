@@ -9,6 +9,8 @@ define('ADMIN_PATH', APP_ROOT_PATH . '/admin');
 define('MODULE_PATH', ADMIN_PATH . '/module');
 define('INCLUDE_PATH', ADMIN_PATH . '/template/includes');
 
+define('BASE_URL', '/web-kasir-new'); // Sesuaikan dengan folder proyek Anda
+
 // Sertakan config.php (yang berisi koneksi database $db)
 // Path: dari APP_ROOT_PATH (yaitu web-kasir-new/) ke config.php (di root)
 require_once APP_ROOT_PATH . '/config.php';
