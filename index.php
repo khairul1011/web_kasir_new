@@ -1,5 +1,6 @@
 <?php
 // web-kasir-new/index.php
+ob_start();
 
 // session_start(); // Baris ini di-komentar sesuai permintaan
 

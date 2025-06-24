@@ -1,16 +1,5 @@
 <?php
-/*
-* File: modules/barang/index.php
-* Deskripsi: Halaman pengelolaan produk untuk aplikasi kasir.
-* Menampilkan daftar produk, serta menyediakan fitur tambah, edit, dan hapus.
-* Menambahkan modal untuk fitur tambah produk, pagination, dan fungsi pencarian OTOMATIS.
-* File ini berfungsi sebagai halaman utama dan juga endpoint AJAX (mengembalikan HTML penuh).
-*/
 
-// Asumsi $db dan $view sudah tersedia dari file utama (misalnya index.php)
-// yang meng-include config.php dan fungsi/view.php
-
-// Pastikan $view object sudah diinisialisasi
 if (!isset($view) || !($view instanceof View)) {
     // Fallback inisialisasi jika modul diakses langsung
     require_once __DIR__ . '/../../../config.php';

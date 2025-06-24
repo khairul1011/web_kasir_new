@@ -573,4 +573,45 @@ class View
         $hasil = $row->fetchAll();
         return $hasil;
     }
+
+     public function generate_search_result_html($keyword = '')
+    {
+        if (!empty($keyword)) {
+            $stmt = $this->db->prepare("SELECT id, nama, harga FROM produk WHERE (nama LIKE ? OR id LIKE ?) AND stok > 0");
+            $search_keyword = '%' . $keyword . '%';
+            $stmt->execute([$search_keyword, $search_keyword]);
+        } else {
+            $stmt = $this->db->prepare("SELECT id, nama, harga FROM produk WHERE stok > 0 LIMIT 10");
+            $stmt->execute();
+        }
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $html_output = '';
+
+        if (!empty($products)) {
+            foreach ($products as $produk) {
+                $html_output .= '<tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">';
+                $html_output .= '  <td class="px-2 py-2 font-medium text-gray-900 dark:text-white">' . htmlspecialchars($produk['nama']) . '</td>';
+                $html_output .= '  <td class="px-2 py-2">Rp ' . number_format($produk['harga'], 0, ',', '.') . '</td>';
+                $html_output .= '  <td class="px-2 py-2">';
+                
+                // ==========================================================
+                // PERBAIKAN DI BARIS INI: action diubah ke 'fungsi/tambah/tambah.php'
+                // ==========================================================
+                $html_output .= '      <form method="POST" action="fungsi/tambah/tambah.php">';
+
+                $html_output .= '          <input type="hidden" name="action" value="add_to_cart">';
+                $html_output .= '          <input type="hidden" name="produk_id" value="' . $produk['id'] . '">';
+                $html_output .= '          <button type="submit" class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm">+ Tambah</button>';
+                $html_output .= '      </form>';
+                $html_output .= '  </td>';
+                $html_output .= '</tr>';
+            }
+        } else {
+            $html_output = '<tr><td colspan="3" class="py-4 text-center text-gray-500 dark:text-gray-400">Produk tidak ditemukan.</td></tr>';
+        }
+
+        return $html_output;
+    }
 }
+
