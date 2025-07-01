@@ -1,78 +1,12 @@
 <?php
-
-if (!isset($view) || !($view instanceof View)) {
-    // Fallback inisialisasi jika modul diakses langsung
+// Your clean PHP code at the top remains the same
+if (!isset($view)) {
     require_once __DIR__ . '/../../../config.php';
     require_once __DIR__ . '/../../../fungsi/view/view.php';
     $view = new View($db);
 }
-
-// --- LOGIKA PENCARIAN & PAGINATION START ---
-$cari_keyword = isset($_GET['cari']) ? htmlspecialchars($_GET['cari']) : null; // Ambil kata kunci pencarian
-
-$batas = 10; // Jumlah produk per halaman
-$halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1; // Halaman saat ini, default ke 1
-
-// Pastikan halaman tidak kurang dari 1
-if ($halaman < 1) {
-    $halaman = 1;
-}
-
-$halaman_awal = ($halaman > 0) ? ($halaman * $batas) - $batas : 0; // Offset
-
-// Ambil total jumlah produk berdasarkan pencarian
-$jumlah_data = $view->produk_row_count_total_with_search($cari_keyword);
-$total_halaman = ceil($jumlah_data / $batas); // Hitung total halaman
-
-// Pastikan halaman tidak melebihi total halaman (jika ada produk)
-if ($halaman > $total_halaman && $total_halaman > 0) {
-    $halaman = $total_halaman;
-    $halaman_awal = ($halaman - 1) * $batas; // Sesuaikan offset
-} elseif ($total_halaman == 0) {
-    $halaman = 0; // Tidak ada halaman jika tidak ada produk
-    $halaman_awal = 0;
-}
-
-$previous = $halaman - 1;
-$next = $halaman + 1;
-
-// Ambil data produk untuk halaman saat ini, termasuk pencarian
-$daftarProduk = $view->produk_pagination_with_search($batas, $halaman_awal, $cari_keyword);
-
-// Inisialisasi nomor urut awal untuk tabel
-$nomor = $halaman_awal + 1;
-// --- LOGIKA PENCARIAN & PAGINATION END ---
-
-
-// Ambil semua kategori unik untuk dropdown di modal
-$daftarKategori = $view->kategori();
-
-// Cek pesan sukses/error dari operasi sebelumnya
-$message = '';
-$message_type = '';
-
-if (isset($_GET['success'])) {
-    $message_type = 'success';
-    if ($_GET['success'] == 'tambah-data') {
-        $message = 'Data produk berhasil ditambahkan!';
-    } elseif ($_GET['success'] == 'edit-data') {
-        $message = 'Data produk berhasil diperbarui!';
-    }
-} elseif (isset($_GET['remove'])) {
-    $message_type = 'success';
-    if ($_GET['remove'] == 'hapus-data') {
-        $message = 'Data produk berhasil dihapus!';
-    }
-} elseif (isset($_GET['error'])) {
-    $message_type = 'error';
-    if ($_GET['error'] == 'gagal-tambah') {
-        $message = 'Gagal menambahkan data produk. Silakan coba lagi.';
-    } elseif ($_GET['error'] == 'gagal-edit') {
-        $message = 'Gagal memperbarui data produk. Silakan coba lagi.';
-    } elseif ($_GET['error'] == 'gagal-hapus') {
-        $message = 'Gagal menghapus data produk. Mungkin produk ini terkait dengan transaksi.';
-    }
-}
+$pageData = $view->getBarangPageData($_GET);
+extract($pageData);
 ?>
 
 <div class="mb-6">
@@ -100,13 +34,18 @@ if (isset($_GET['success'])) {
                 </div>
                 <input type="search" name="cari" id="searchInput" class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cari produk..." value="<?php echo htmlspecialchars($cari_keyword ?? ''); ?>" />
             </form>
-
             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition duration-200 w-full sm:w-auto" type="button">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Tambah Produk Baru
             </button>
+            <a href="index.php?page=barang&filter=stok_kurang" class="inline-flex items-center justify-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg text-sm">
+                Stok Kurang
+            </a>
+            <a href="index.php?page=barang" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg text-sm">
+                Refresh
+            </a>
         </div>
     </div>
 
@@ -318,116 +257,63 @@ if (isset($_GET['success'])) {
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const productTableBody = document.getElementById('productTableBody');
-            const paginationNav = document.getElementById('paginationNav');
-            const searchForm = document.getElementById('searchForm');
-            let searchTimeout;
+<script>
+$(document).ready(function() {
+    
+    // Fungsi utama untuk memuat data via AJAX
+    function fetchProducts(page = 1, searchQuery = '', filterQuery = '') {
+        const url = `index.php?page=barang&halaman=${page}&cari=${encodeURIComponent(searchQuery)}&filter=${encodeURIComponent(filterQuery)}`;
+        
+        // Jangan tampilkan loading jika event-nya dari 'keyup' agar lebih mulus
+        if (event.type !== 'keyup') {
+            $('#productTableContainer').html('<p class="text-center p-4">Memuat...</p>');
+        }
 
-            // Fungsi untuk mengambil dan memperbarui produk via AJAX
-            function fetchProducts(page = 1, searchQuery = '') {
-                // Tampilkan indikator loading (opsional)
-                productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">Memuat data...</td></tr>';
-                paginationNav.innerHTML = ''; // Kosongkan pagination saat loading
-
-                // Bangun URL untuk permintaan AJAX
-                // Tetap arahkan ke halaman ini sendiri (index.php?page=barang)
-                const url = `index.php?page=barang&halaman=${page}${searchQuery ? '&cari=' + encodeURIComponent(searchQuery) : ''}`;
-
-                fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest' // Penting: Memberi tahu PHP ini adalah permintaan AJAX
-                        }
-                    })
-                    .then(response => {
-                        // Ubah ini dari .json() menjadi .text() karena responsnya sekarang HTML
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.text(); // Harapkan respons HTML
-                    })
-                    .then(html => {
-                        // Buat elemen DOM sementara untuk mem-parse HTML yang diterima
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-
-                        // Ekstrak tbody dan pagination dari dokumen sementara
-                        const newProductTableBody = doc.getElementById('productTableBody');
-                        const newPaginationNav = doc.getElementById('paginationNav');
-
-                        if (newProductTableBody && newPaginationNav) {
-                            productTableBody.innerHTML = newProductTableBody.innerHTML;
-                            paginationNav.innerHTML = newPaginationNav.innerHTML;
-                        } else {
-                            // Fallback jika elemen tidak ditemukan dalam respons HTML
-                            productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal mengekstrak data dari respons.</td></tr>';
-                            paginationNav.innerHTML = '';
-                        }
-
-                        // Pasang kembali event listener untuk tautan pagination yang baru
-                        attachPaginationListeners();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching products:', error);
-                        productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal memuat data produk.</td></tr>';
-                        paginationNav.innerHTML = '';
-                    });
+        $.ajax({
+            url: url,
+            type: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(response) {
+                $('#productTableContainer').html(response);
+            },
+            error: function() {
+                $('#productTableContainer').html('<p class="text-center p-4 text-red-500">Gagal memuat data.</p>');
             }
-
-            // Fungsi untuk memasang event listener ke tautan pagination
-            function attachPaginationListeners() {
-                const paginationLinks = paginationNav.querySelectorAll('.pagination-link');
-                paginationLinks.forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault(); // Mencegah perilaku default tautan (reload halaman penuh)
-                        const page = this.dataset.page;
-                        const currentSearchQuery = searchInput.value;
-                        fetchProducts(page, currentSearchQuery);
-                    });
-                });
-            }
-
-            // Event listener untuk input pencarian (debounce)
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(searchTimeout); // Hapus timeout sebelumnya
-                    searchTimeout = setTimeout(() => {
-                        const query = this.value;
-                        fetchProducts(1, query); // Selalu kembali ke halaman 1 saat pencarian baru
-                    }, 500); // Waktu debounce: 500ms (setengah detik)
-                });
-            }
-
-            // Event listener untuk form submission (mencegah reload halaman saat Enter ditekan)
-            if (searchForm) {
-                searchForm.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Mencegah perilaku default form submission
-                    // Karena sudah ada event 'input' dengan debounce, kita tidak perlu memanggil fetchProducts di sini
-                    // Cukup pastikan form tidak di-submit secara normal
-                });
-            }
-
-            // Pasang listener pada saat halaman dimuat pertama kali (untuk tautan pagination yang sudah ada)
-            attachPaginationListeners();
         });
+    }
 
-        $(document).on('click', '.edit-btn', function() {
-            // Ambil semua data dari atribut data-* tombol yang diklik
-            const id = $(this).data('id');
-            const nama = $(this).data('nama');
-            const harga = $(this).data('harga');
-            const stok = $(this).data('stok');
-            const kategori = $(this).data('kategori');
-            const deskripsi = $(this).data('deskripsi');
+    // Ambil filter yang sedang aktif dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentFilter = urlParams.get('filter') || '';
+    let searchTimeout;
 
-            // Masukkan data tersebut ke dalam input di form modal edit
-            $('#edit-id').val(id);
-            $('#edit-nama').val(nama);
-            $('#edit-harga').val(harga);
-            $('#edit-stok').val(stok);
-            $('#edit-kategori').val(kategori);
-            $('#edit-deskripsi').val(deskripsi);
-        });
-    </script>
+    // --- PERBAIKAN DI SINI: KEMBALI MENGGUNAKAN 'KEYUP' DENGAN DEBOUNCE ---
+    $('#searchInput').on('keyup', function(e) {
+        clearTimeout(searchTimeout);
+        const query = $(this).val();
+
+        // Tunda request selama 300 milidetik setelah user berhenti mengetik
+        searchTimeout = setTimeout(function() {
+            fetchProducts(1, query, currentFilter);
+        }, 300);
+    });
+
+    // Event listener untuk klik pagination
+    $(document).on('click', '.pagination-link', function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('cursor-not-allowed')) return;
+        fetchProducts($(this).data('page'), $('#searchInput').val(), currentFilter);
+    });
+
+    // Event listener untuk tombol edit
+    $(document).on('click', '.edit-btn', function() {
+        const data = $(this).data();
+        $('#edit-id').val(data.id);
+        $('#edit-nama').val(data.nama);
+        $('#edit-harga').val(data.harga);
+        $('#edit-stok').val(data.stok);
+        $('#edit-kategori').val(data.kategori);
+        $('#edit-deskripsi').val(data.deskripsi);
+    });
+});
+</script>
