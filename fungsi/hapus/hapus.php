@@ -13,7 +13,7 @@ session_start();
 // --- AKSI 1: HAPUS PRODUK (DARI HALAMAN MANAJEMEN BARANG) ---
 // ==========================================================
 if (isset($_GET['produk']) && !empty($_GET['id'])) {
-    
+
     $produk_id = (int)$_GET['id'];
 
     try {
@@ -27,7 +27,6 @@ if (isset($_GET['produk']) && !empty($_GET['id'])) {
             'type' => 'success',
             'message' => 'Data produk berhasil dihapus!'
         ];
-
     } catch (PDOException $e) {
         // Jika terjadi error (misalnya karena produk terkait dengan transaksi),
         // tangkap error tersebut dan kirim pesan gagal.
@@ -60,7 +59,7 @@ class HapusController
     public function deleteItem($postData)
     {
         $keranjang_id = (int)$postData['keranjang_id'];
-        
+
         $stmt_info = $this->db->prepare("SELECT qty, produk_id FROM keranjang WHERE id = ?");
         $stmt_info->execute([$keranjang_id]);
         $item = $stmt_info->fetch(PDO::FETCH_ASSOC);
@@ -79,12 +78,12 @@ class HapusController
         $stmt_items = $this->db->prepare("SELECT qty, produk_id FROM keranjang WHERE user_id = ?");
         $stmt_items->execute([$user_id]);
         $items_to_reset = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
-        
+
         foreach ($items_to_reset as $item) {
             $stmt_stok = $this->db->prepare("UPDATE produk SET stok = stok + ? WHERE id = ?");
             $stmt_stok->execute([$item['qty'], $item['produk_id']]);
         }
-        
+
         $stmt_clear = $this->db->prepare("DELETE FROM keranjang WHERE user_id = ?");
         $stmt_clear->execute([$user_id]);
     }
@@ -99,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'reset_cart') {
         $controller->resetCart();
     }
-    
+
     header('Location: ../../index.php?page=jual');
     exit;
 }
@@ -107,4 +106,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Jika tidak ada aksi yang cocok, redirect ke halaman utama
 header('Location: ../../index.php');
 exit;
-?>
