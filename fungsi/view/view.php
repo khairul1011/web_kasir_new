@@ -613,5 +613,130 @@ class View
 
         return $html_output;
     }
+
+    public function getLaporanData($filters = [])
+    {
+        $sql = "SELECT 
+                    detail_transaksi.id as detail_id,
+                    produk.id as id_barang,
+                    produk.nama as nama_barang,
+                    detail_transaksi.qty as jumlah,
+                    detail_transaksi.subtotal as total,
+                    users.nama as kasir,
+                    transaksi.tanggal as tanggal_input
+                FROM detail_transaksi
+                JOIN transaksi ON detail_transaksi.transaksi_id = transaksi.id
+                JOIN produk ON detail_transaksi.produk_id = produk.id
+                LEFT JOIN users ON transaksi.user_id = users.id";
+
+        $params = [];
+        $where_clauses = [];
+
+        // Filter berdasarkan Bulan dan Tahun
+        if (!empty($filters['bulan']) && !empty($filters['tahun'])) {
+            $bulan = sprintf("%02d", (int)$filters['bulan']);
+            $tahun = (int)$filters['tahun'];
+            $where_clauses[] = "DATE_FORMAT(transaksi.tanggal, '%Y-%m') = ?";
+            $params[] = "$tahun-$bulan";
+        }
+        // Filter berdasarkan Hari
+        else if (!empty($filters['hari'])) {
+            $hari = date("Y-m-d", strtotime($filters['hari']));
+            $where_clauses[] = "DATE(transaksi.tanggal) = ?";
+            $params[] = $hari;
+        }
+
+        if (!empty($where_clauses)) {
+            $sql .= " WHERE " . implode(" AND ", $where_clauses);
+        }
+
+        $sql .= " ORDER BY transaksi.tanggal DESC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function exportLaporanToExcel($filters = [])
+    {
+        // --- LOGIKA PENGAMBILAN DATA (Tidak ada perubahan di sini) ---
+        $sql = "SELECT 
+                    produk.id as id_barang,
+                    produk.nama as nama_barang,
+                    detail_transaksi.qty as jumlah,
+                    detail_transaksi.subtotal as total,
+                    users.nama as kasir,
+                    transaksi.tanggal as tanggal_input
+                FROM detail_transaksi
+                JOIN transaksi ON detail_transaksi.transaksi_id = transaksi.id
+                JOIN produk ON detail_transaksi.produk_id = produk.id
+                LEFT JOIN users ON transaksi.user_id = users.id";
+
+        $params = [];
+        $where_clauses = [];
+        $nama_file = "Laporan Penjualan Keseluruhan";
+
+        if (!empty($filters['bulan']) && !empty($filters['tahun'])) {
+            $bulan = sprintf("%02d", (int)$filters['bulan']);
+            $tahun = (int)$filters['tahun'];
+            $where_clauses[] = "DATE_FORMAT(transaksi.tanggal, '%Y-%m') = ?";
+            $params[] = "$tahun-$bulan";
+            $nama_bulan = date("F", mktime(0, 0, 0, $bulan, 10));
+            $nama_file = "Laporan Penjualan - {$nama_bulan} {$tahun}";
+        } else if (!empty($filters['hari'])) {
+            $hari = date("Y-m-d", strtotime($filters['hari']));
+            $where_clauses[] = "DATE(transaksi.tanggal) = ?";
+            $params[] = $hari;
+            $nama_file = "Laporan Penjualan - " . date("d F Y", strtotime($hari));
+        }
+
+        if (!empty($where_clauses)) {
+            $sql .= " WHERE " . implode(" AND ", $where_clauses);
+        }
+        $sql .= " ORDER BY transaksi.tanggal ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $laporan_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // --- MEMBUAT FILE CSV YANG DIKENALI EXCEL ---
+
+        // 1. Ubah Content-Type menjadi untuk CSV
+        header("Content-Type: text/csv");
+        // 2. Ubah ekstensi file menjadi .csv
+        header("Content-Disposition: attachment; filename=\"{$nama_file}.csv\"");
+
+        $output = fopen("php://output", "w");
+        
+        // Tulis baris header tabel (gunakan koma sebagai pemisah)
+        fputcsv($output, [
+            'ID Barang', 
+            'Nama Barang', 
+            'Jumlah Terjual', 
+            'Total Penjualan (Rp)', 
+            'Kasir', 
+            'Tanggal Input'
+        ]);
+
+        // Tulis setiap baris data (gunakan koma sebagai pemisah)
+        if (!empty($laporan_data)) {
+            foreach ($laporan_data as $row) {
+                $data_row = [
+                    $row['id_barang'],
+                    $row['nama_barang'],
+                    $row['jumlah'],
+                    $row['total'],
+                    $row['kasir'] ?? 'N/A',
+                    date("d-m-Y H:i:s", strtotime($row['tanggal_input']))
+                ];
+                fputcsv($output, $data_row);
+            }
+        }
+        fclose($output);
+        exit;
+    }
+
+
+
 }
 
