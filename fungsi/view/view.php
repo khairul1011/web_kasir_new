@@ -35,14 +35,15 @@ class View
      * @param int $id ID pengguna.
      * @return array Hasil query dalam bentuk array asosiatif tunggal.
      */
+// di dalam file fungsi/view/view.php
+
     public function user_edit($id)
     {
-        // Sesuaikan dengan nama tabel 'users' di database Anda
-        $sql = "SELECT * FROM users WHERE id = ?";
+        // Pastikan query ini mengambil semua kolom yang diperlukan, TERMASUK 'foto'
+        $sql = "SELECT username, nama, email, nohp, alamat, foto FROM users WHERE id = ?";
         $row = $this->db->prepare($sql);
         $row->execute(array($id));
-        $hasil = $row->fetch();
-        return $hasil;
+        return $row->fetch();
     }
 
     /**
@@ -431,4 +432,5 @@ class View
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'];
     }
+    
 }

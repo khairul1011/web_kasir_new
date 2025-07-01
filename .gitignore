@@ -39,3 +39,5 @@ Thumbs.db
 *.sublime-workspace
 .idea/
 .vscode/
+
+/assets/img/profil/
