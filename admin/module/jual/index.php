@@ -1,9 +1,4 @@
 <?php
-/*
-* File: admin/module/jual/index.php
-* Deskripsi: Halaman kasir dengan keranjang dikelola oleh JavaScript (Client-Side).
-*/
-// PHP di sini hanya untuk mengambil pesan notifikasi.
 $flash_message = null;
 if (isset($_SESSION['flash_message'])) {
     $flash_message = $_SESSION['flash_message'];
