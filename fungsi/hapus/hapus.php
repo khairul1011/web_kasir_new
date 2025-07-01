@@ -9,9 +9,7 @@
 require_once __DIR__ . '/../../config.php';
 session_start();
 
-// ==========================================================
-// --- AKSI 1: HAPUS PRODUK (DARI HALAMAN MANAJEMEN BARANG) ---
-// ==========================================================
+// --- HAPUS PRODUK HALAMAN BARANG) ---
 if (isset($_GET['produk']) && !empty($_GET['id'])) {
 
     $produk_id = (int)$_GET['id'];
