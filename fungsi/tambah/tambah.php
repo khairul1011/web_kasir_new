@@ -1,25 +1,16 @@
 <?php
-/*
-* File: fungsi/tambah/tambah.php
-* Deskripsi: Versi final yang menangani:
-* 1. Tambah Produk Baru (dari halaman barang)
-* 2. Proses Pembayaran Akhir (dari halaman jual)
-*/
 
-// Memanggil file konfigurasi database dan memulai sesi
 require_once __DIR__ . '/../../config.php';
-session_start();
+// session_start();
 
-// Fungsi untuk membersihkan input (jika diperlukan)
+// Fungsi untuk membersihkan input
 function sanitize_input($data)
 {
     return htmlentities(trim($data));
 }
 
-// ==========================================================
-// --- AKSI 1: TAMBAH PRODUK BARU (DARI HALAMAN BARANG) ---
-// --- Kode ini TIDAK DIUBAH dan tetap berfungsi seperti biasa ---
-// ==========================================================
+// --- FUNGSI HALAMAN BARANG ---
+// --- TAMBAH PRODUK BARU (DARI HALAMAN BARANG) ---
 if (isset($_GET['produk'])) {
     $kategori  = sanitize_input($_POST['kategori']);
     $nama      = sanitize_input($_POST['nama']);
@@ -42,11 +33,8 @@ if (isset($_GET['produk'])) {
     exit;
 }
 
-
-// ==========================================================
-// --- AKSI 2: PROSES PEMBAYARAN FINAL (DARI HALAMAN JUAL) ---
-// --- Ini adalah satu-satunya aksi yang dibutuhkan dari halaman penjualan ---
-// ==========================================================
+// --- FUNGSI HALAMAN TRANSAKSI ---
+// --- PROSES PEMBAYARAN FINAL (DARI HALAMAN JUAL) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cart_data'])) {
 
     $user_id = 1; // Sesuaikan dengan sesi login Anda
@@ -107,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cart_data'])) {
     header('Location: ../../index.php?page=jual');
     exit;
 }
-
 
 // Jika tidak ada aksi yang cocok di file ini, redirect ke halaman utama
 header('Location: ../../index.php');
