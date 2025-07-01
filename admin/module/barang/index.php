@@ -40,7 +40,7 @@ $next = $halaman + 1;
 $daftarProduk = $view->produk_pagination_with_search($batas, $halaman_awal, $cari_keyword);
 
 // Inisialisasi nomor urut awal untuk tabel
-$nomor = $halaman_awal + 1; 
+$nomor = $halaman_awal + 1;
 // --- LOGIKA PENCARIAN & PAGINATION END ---
 
 
@@ -95,14 +95,16 @@ if (isset($_GET['success'])) {
                 <input type="hidden" name="page" value="barang">
                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                     </svg>
                 </div>
                 <input type="search" name="cari" id="searchInput" class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cari produk..." value="<?php echo htmlspecialchars($cari_keyword ?? ''); ?>" />
-                </form>
+            </form>
 
             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition duration-200 w-full sm:w-auto" type="button">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
                 Tambah Produk Baru
             </button>
         </div>
@@ -132,19 +134,34 @@ if (isset($_GET['success'])) {
                             <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">Rp <?php echo number_format($produk['harga'], 2, ',', '.'); ?></td>
                             <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"><?php echo htmlspecialchars($produk['stok']); ?></td>
                             <td class="py-3 px-4 whitespace-nowrap text-sm">
-                                <a href="index.php?page=produk-edit&id=<?php echo htmlspecialchars($produk['id']); ?>" class="inline-flex items-center px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-md text-xs transition duration-200 mr-2">
-                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <button type="button"
+                                    class="edit-btn inline-flex items-center px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-md text-xs"
+                                    data-modal-target="edit-modal"
+                                    data-modal-toggle="edit-modal"
+                                    data-id="<?php echo htmlspecialchars($produk['id']); ?>"
+                                    data-nama="<?php echo htmlspecialchars($produk['nama']); ?>"
+                                    data-harga="<?php echo htmlspecialchars($produk['harga']); ?>"
+                                    data-stok="<?php echo htmlspecialchars($produk['stok']); ?>"
+                                    data-kategori="<?php echo htmlspecialchars($produk['kategori']); ?>"
+                                    data-deskripsi="<?php echo htmlspecialchars($produk['deskripsi']); ?>">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                    </svg>
                                     Edit
-                                </a>
-                                <a href="<?php echo APP_ROOT_PATH; ?>/fungsi/hapus/hapus.php?produk&id=<?php echo htmlspecialchars($produk['id']); ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?');" class="inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-xs transition duration-200">
-                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                                <a href="<?php echo BASE_URL; ?>/fungsi/hapus/hapus.php?produk&id=<?php echo htmlspecialchars($produk['id']); ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?');" class="inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-xs transition duration-200">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
                                     Hapus
                                 </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="7" class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">Tidak ada produk yang tersedia.</td></tr>
+                    <tr>
+                        <td colspan="7" class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">Tidak ada produk yang tersedia.</td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -157,18 +174,18 @@ if (isset($_GET['success'])) {
                     <?php echo ($halaman <= 1) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''; ?>">
                     <span class="sr-only">Previous</span>
                     <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
                     </svg>
                 </a>
             </li>
 
             <?php for ($x = 1; $x <= $total_halaman; $x++): ?>
-            <li>
-                <a href="#" data-page="<?php echo $x; ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight border border-gray-300
+                <li>
+                    <a href="#" data-page="<?php echo $x; ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight border border-gray-300
                     <?php echo ($x === $halaman) ? 'z-10 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'; ?>">
-                    <?php echo $x; ?>
-                </a>
-            </li>
+                        <?php echo $x; ?>
+                    </a>
+                </li>
             <?php endfor; ?>
 
             <li>
@@ -176,14 +193,14 @@ if (isset($_GET['success'])) {
                     <?php echo ($halaman >= $total_halaman || $total_halaman == 0) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''; ?>">
                     <span class="sr-only">Next</span>
                     <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
                     </svg>
                 </a>
             </li>
         </ul>
     </nav>
 
-
+    <!-- Modal Tambah Produk -->
     <div id="crud-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-auto max-h-[90vh]">
         <div class="relative p-4 w-full max-w-md h-auto">
             <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
@@ -193,7 +210,7 @@ if (isset($_GET['success'])) {
                     </h3>
                     <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                         </svg>
                         <span class="sr-only">Close modal</span>
                     </button>
@@ -233,7 +250,9 @@ if (isset($_GET['success'])) {
                         </div>
                     </div>
                     <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+                        <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                        </svg>
                         Tambah Produk
                     </button>
                 </form>
@@ -241,99 +260,174 @@ if (isset($_GET['success'])) {
             </div>
         </div>
     </div>
+    <!-- Modal Edit Produk -->
+    <div id="edit-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-auto max-h-[90vh]">
+        <div class="relative p-4 w-full max-w-md h-auto">
+            <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Edit Produk
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="edit-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <form id="edit-product-form" class="p-4 md:p-5" method="POST" action="fungsi/edit/edit.php?produk">
+                    <input type="hidden" name="id" id="edit-id">
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const productTableBody = document.getElementById('productTableBody');
-    const paginationNav = document.getElementById('paginationNav');
-    const searchForm = document.getElementById('searchForm'); 
-    let searchTimeout;
+                    <div class="grid gap-4 mb-4 grid-cols-2">
+                        <div class="col-span-2">
+                            <label for="edit-nama" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Produk</label>
+                            <input type="text" name="nama" id="edit-nama" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <label for="edit-harga" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga</label>
+                            <input type="number" name="harga" id="edit-harga" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <label for="edit-stok" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stok</label>
+                            <input type="number" name="stok" id="edit-stok" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                        </div>
+                        <div class="col-span-2">
+                            <label for="edit-kategori" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
+                            <select name="kategori" id="edit-kategori" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="">Pilih Kategori</option>
+                                <?php foreach ($daftarKategori as $kategori): ?>
+                                    <option value="<?php echo htmlspecialchars($kategori['kategori']); ?>">
+                                        <?php echo htmlspecialchars($kategori['kategori']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <label for="edit-deskripsi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deskripsi Produk</label>
+                            <textarea name="deskripsi" id="edit-deskripsi" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    // Fungsi untuk mengambil dan memperbarui produk via AJAX
-    function fetchProducts(page = 1, searchQuery = '') {
-        // Tampilkan indikator loading (opsional)
-        productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">Memuat data...</td></tr>';
-        paginationNav.innerHTML = ''; // Kosongkan pagination saat loading
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const productTableBody = document.getElementById('productTableBody');
+            const paginationNav = document.getElementById('paginationNav');
+            const searchForm = document.getElementById('searchForm');
+            let searchTimeout;
 
-        // Bangun URL untuk permintaan AJAX
-        // Tetap arahkan ke halaman ini sendiri (index.php?page=barang)
-        const url = `index.php?page=barang&halaman=${page}${searchQuery ? '&cari=' + encodeURIComponent(searchQuery) : ''}`;
+            // Fungsi untuk mengambil dan memperbarui produk via AJAX
+            function fetchProducts(page = 1, searchQuery = '') {
+                // Tampilkan indikator loading (opsional)
+                productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">Memuat data...</td></tr>';
+                paginationNav.innerHTML = ''; // Kosongkan pagination saat loading
 
-        fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Penting: Memberi tahu PHP ini adalah permintaan AJAX
+                // Bangun URL untuk permintaan AJAX
+                // Tetap arahkan ke halaman ini sendiri (index.php?page=barang)
+                const url = `index.php?page=barang&halaman=${page}${searchQuery ? '&cari=' + encodeURIComponent(searchQuery) : ''}`;
+
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Penting: Memberi tahu PHP ini adalah permintaan AJAX
+                        }
+                    })
+                    .then(response => {
+                        // Ubah ini dari .json() menjadi .text() karena responsnya sekarang HTML
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text(); // Harapkan respons HTML
+                    })
+                    .then(html => {
+                        // Buat elemen DOM sementara untuk mem-parse HTML yang diterima
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        // Ekstrak tbody dan pagination dari dokumen sementara
+                        const newProductTableBody = doc.getElementById('productTableBody');
+                        const newPaginationNav = doc.getElementById('paginationNav');
+
+                        if (newProductTableBody && newPaginationNav) {
+                            productTableBody.innerHTML = newProductTableBody.innerHTML;
+                            paginationNav.innerHTML = newPaginationNav.innerHTML;
+                        } else {
+                            // Fallback jika elemen tidak ditemukan dalam respons HTML
+                            productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal mengekstrak data dari respons.</td></tr>';
+                            paginationNav.innerHTML = '';
+                        }
+
+                        // Pasang kembali event listener untuk tautan pagination yang baru
+                        attachPaginationListeners();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
+                        productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal memuat data produk.</td></tr>';
+                        paginationNav.innerHTML = '';
+                    });
             }
-        })
-        .then(response => {
-            // Ubah ini dari .json() menjadi .text() karena responsnya sekarang HTML
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text(); // Harapkan respons HTML
-        })
-        .then(html => {
-            // Buat elemen DOM sementara untuk mem-parse HTML yang diterima
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
 
-            // Ekstrak tbody dan pagination dari dokumen sementara
-            const newProductTableBody = doc.getElementById('productTableBody');
-            const newPaginationNav = doc.getElementById('paginationNav');
-
-            if (newProductTableBody && newPaginationNav) {
-                productTableBody.innerHTML = newProductTableBody.innerHTML;
-                paginationNav.innerHTML = newPaginationNav.innerHTML;
-            } else {
-                // Fallback jika elemen tidak ditemukan dalam respons HTML
-                productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal mengekstrak data dari respons.</td></tr>';
-                paginationNav.innerHTML = '';
+            // Fungsi untuk memasang event listener ke tautan pagination
+            function attachPaginationListeners() {
+                const paginationLinks = paginationNav.querySelectorAll('.pagination-link');
+                paginationLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault(); // Mencegah perilaku default tautan (reload halaman penuh)
+                        const page = this.dataset.page;
+                        const currentSearchQuery = searchInput.value;
+                        fetchProducts(page, currentSearchQuery);
+                    });
+                });
             }
-            
-            // Pasang kembali event listener untuk tautan pagination yang baru
+
+            // Event listener untuk input pencarian (debounce)
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout); // Hapus timeout sebelumnya
+                    searchTimeout = setTimeout(() => {
+                        const query = this.value;
+                        fetchProducts(1, query); // Selalu kembali ke halaman 1 saat pencarian baru
+                    }, 500); // Waktu debounce: 500ms (setengah detik)
+                });
+            }
+
+            // Event listener untuk form submission (mencegah reload halaman saat Enter ditekan)
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Mencegah perilaku default form submission
+                    // Karena sudah ada event 'input' dengan debounce, kita tidak perlu memanggil fetchProducts di sini
+                    // Cukup pastikan form tidak di-submit secara normal
+                });
+            }
+
+            // Pasang listener pada saat halaman dimuat pertama kali (untuk tautan pagination yang sudah ada)
             attachPaginationListeners();
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error);
-            productTableBody.innerHTML = '<tr><td colspan="7" class="py-3 px-4 text-center text-red-600 dark:text-red-400">Gagal memuat data produk.</td></tr>';
-            paginationNav.innerHTML = '';
         });
-    }
 
-    // Fungsi untuk memasang event listener ke tautan pagination
-    function attachPaginationListeners() {
-        const paginationLinks = paginationNav.querySelectorAll('.pagination-link');
-        paginationLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault(); // Mencegah perilaku default tautan (reload halaman penuh)
-                const page = this.dataset.page;
-                const currentSearchQuery = searchInput.value;
-                fetchProducts(page, currentSearchQuery);
-            });
+        $(document).on('click', '.edit-btn', function() {
+            // Ambil semua data dari atribut data-* tombol yang diklik
+            const id = $(this).data('id');
+            const nama = $(this).data('nama');
+            const harga = $(this).data('harga');
+            const stok = $(this).data('stok');
+            const kategori = $(this).data('kategori');
+            const deskripsi = $(this).data('deskripsi');
+
+            // Masukkan data tersebut ke dalam input di form modal edit
+            $('#edit-id').val(id);
+            $('#edit-nama').val(nama);
+            $('#edit-harga').val(harga);
+            $('#edit-stok').val(stok);
+            $('#edit-kategori').val(kategori);
+            $('#edit-deskripsi').val(deskripsi);
         });
-    }
-
-    // Event listener untuk input pencarian (debounce)
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout); // Hapus timeout sebelumnya
-            searchTimeout = setTimeout(() => {
-                const query = this.value;
-                fetchProducts(1, query); // Selalu kembali ke halaman 1 saat pencarian baru
-            }, 500); // Waktu debounce: 500ms (setengah detik)
-        });
-    }
-
-    // Event listener untuk form submission (mencegah reload halaman saat Enter ditekan)
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Mencegah perilaku default form submission
-            // Karena sudah ada event 'input' dengan debounce, kita tidak perlu memanggil fetchProducts di sini
-            // Cukup pastikan form tidak di-submit secara normal
-        });
-    }
-
-    // Pasang listener pada saat halaman dimuat pertama kali (untuk tautan pagination yang sudah ada)
-    attachPaginationListeners();
-});
-</script>
+    </script>

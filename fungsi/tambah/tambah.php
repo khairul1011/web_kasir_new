@@ -11,7 +11,8 @@ require_once __DIR__ . '/../../config.php';
 session_start();
 
 // Fungsi untuk membersihkan input (jika diperlukan)
-function sanitize_input($data) {
+function sanitize_input($data)
+{
     return htmlentities(trim($data));
 }
 
@@ -19,13 +20,13 @@ function sanitize_input($data) {
 // --- AKSI 1: TAMBAH PRODUK BARU (DARI HALAMAN BARANG) ---
 // --- Kode ini TIDAK DIUBAH dan tetap berfungsi seperti biasa ---
 // ==========================================================
-if (isset($_GET['produk'])) { 
-    $kategori  = sanitize_input($_POST['kategori']);      
-    $nama      = sanitize_input($_POST['nama']);          
-    $harga     = sanitize_input($_POST['harga']);         
-    $stok      = sanitize_input($_POST['stok']);          
-    $deskripsi = isset($_POST['deskripsi']) ? sanitize_input($_POST['deskripsi']) : null; 
-    $outlet_id = isset($_POST['outlet_id']) ? (int)$_POST['outlet_id'] : null; 
+if (isset($_GET['produk'])) {
+    $kategori  = sanitize_input($_POST['kategori']);
+    $nama      = sanitize_input($_POST['nama']);
+    $harga     = sanitize_input($_POST['harga']);
+    $stok      = sanitize_input($_POST['stok']);
+    $deskripsi = isset($_POST['deskripsi']) ? sanitize_input($_POST['deskripsi']) : null;
+    $outlet_id = isset($_POST['outlet_id']) ? (int)$_POST['outlet_id'] : null;
 
     $data_produk = [$nama, $kategori, $harga, $stok, $deskripsi, $outlet_id];
     $sql = 'INSERT INTO produk (nama, kategori, harga, stok, deskripsi, outlet_id) VALUES (?, ?, ?, ?, ?, ?)';
@@ -47,19 +48,19 @@ if (isset($_GET['produk'])) {
 // --- Ini adalah satu-satunya aksi yang dibutuhkan dari halaman penjualan ---
 // ==========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cart_data'])) {
-    
+
     $user_id = 1; // Sesuaikan dengan sesi login Anda
-    
+
     // 1. Ambil data keranjang dari input hidden dan ubah dari JSON ke array PHP
     $cart_json = $_POST['cart_data'];
     $keranjang_items = json_decode($cart_json, true);
 
     // Pastikan data valid
     if (json_last_error() === JSON_ERROR_NONE && !empty($keranjang_items)) {
-        
+
         // 2. Hitung total belanja dari data yang diterima
         $total_bayar = 0;
-        foreach($keranjang_items as $item) {
+        foreach ($keranjang_items as $item) {
             $total_bayar += $item['subtotal'];
         }
 
@@ -83,21 +84,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cart_data'])) {
                 // Kurangi stok di tabel 'produk'
                 $stmt_stok->execute([$item['quantity'], $item['id']]);
             }
-            
+
             // 6. Jika semua berhasil, simpan permanen
             $db->commit();
-             $_SESSION['flash_message'] = [
-            'type' => 'success',
-            'message' => "Transaksi dengan kode $kode_transaksi berhasil!"
-        ];
-
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => "Transaksi dengan kode $kode_transaksi berhasil!"
+            ];
         } catch (Exception $e) {
             // 7. Jika ada 1 saja yang gagal, batalkan semua
             $db->rollBack();
             $_SESSION['flash_message'] = [
-            'type' => 'error',
-            'message' => "Error: Transaksi Gagal. " . $e->getMessage()
-        ];
+                'type' => 'error',
+                'message' => "Error: Transaksi Gagal. " . $e->getMessage()
+            ];
         }
     } else {
         $_SESSION['flash_message_error'] = "Data keranjang tidak valid atau kosong.";

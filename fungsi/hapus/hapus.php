@@ -1,6 +1,52 @@
 <?php
+/*
+* File: fungsi/hapus/hapus.php
+* Deskripsi: Menangani semua aksi penghapusan data.
+* 1. Hapus Produk (dari halaman barang)
+* 2. Hapus Item dari Keranjang (dari halaman jual - jika menggunakan keranjang DB)
+*/
+
 require_once __DIR__ . '/../../config.php';
-// session_start();
+session_start();
+
+// ==========================================================
+// --- AKSI 1: HAPUS PRODUK (DARI HALAMAN MANAJEMEN BARANG) ---
+// ==========================================================
+if (isset($_GET['produk']) && !empty($_GET['id'])) {
+    
+    $produk_id = (int)$_GET['id'];
+
+    try {
+        // Hapus produk dari database berdasarkan ID
+        $sql = 'DELETE FROM produk WHERE id = ?';
+        $row = $db->prepare($sql);
+        $row->execute([$produk_id]);
+
+        // Set pesan sukses di session untuk ditampilkan di halaman produk
+        $_SESSION['flash_message'] = [
+            'type' => 'success',
+            'message' => 'Data produk berhasil dihapus!'
+        ];
+
+    } catch (PDOException $e) {
+        // Jika terjadi error (misalnya karena produk terkait dengan transaksi),
+        // tangkap error tersebut dan kirim pesan gagal.
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'message' => 'Gagal menghapus produk. Mungkin produk ini sudah pernah ada dalam transaksi.'
+        ];
+    }
+
+    // Arahkan kembali ke halaman manajemen barang
+    header('Location: ../../index.php?page=barang');
+    exit;
+}
+
+
+// =================================================================
+// --- KODE LAMA ANDA UNTUK KERANJANG - TETAP AMAN DI SINI ---
+// --- Ini tidak akan berjalan kecuali dipanggil dari form lain ---
+// =================================================================
 
 class HapusController
 {
@@ -44,9 +90,6 @@ class HapusController
     }
 }
 
-// ==========================================================
-// Router di dalam file
-// ==========================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller = new HapusController($db);
     $action = isset($_POST['action']) ? $_POST['action'] : '';
@@ -56,8 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'reset_cart') {
         $controller->resetCart();
     }
+    
+    header('Location: ../../index.php?page=jual');
+    exit;
 }
 
-header('Location: ../../index.php?page=jual');
+// Jika tidak ada aksi yang cocok, redirect ke halaman utama
+header('Location: ../../index.php');
 exit;
 ?>

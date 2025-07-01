@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/../../config.php';
-session_start();
+// session_start();
+
+function sanitize_input($data) {
+    return htmlentities(trim($data));
+}
 
 // Bagian untuk menangani Pencarian AJAX
 if (!empty($_GET['cari_barang'])) {
@@ -54,6 +58,25 @@ if (!empty($_GET['cari_barang'])) {
     exit;
 }
 
+//   LOGIKA UNTUK MENANGANI SUBMIT DARI FORM EDIT PRODUK
+if (isset($_GET['produk'])) {
+    $id        = (int)sanitize_input($_POST['id']);
+    $nama      = sanitize_input($_POST['nama']);
+    $harga     = sanitize_input($_POST['harga']);
+    $stok      = (int)sanitize_input($_POST['stok']);
+    $kategori  = sanitize_input($_POST['kategori']);
+    $deskripsi = sanitize_input($_POST['deskripsi']);
+
+    $data = [$nama, $kategori, $harga, $stok, $deskripsi, $id];
+    $sql = "UPDATE produk SET nama=?, kategori=?, harga=?, stok=?, deskripsi=? WHERE id=?";
+    
+    $row = $db->prepare($sql);
+    $row->execute($data);
+
+    // Redirect dengan pesan sukses
+    echo '<script>window.location="../../index.php?page=barang&success=edit-data";</script>';
+    exit;
+}
 
 // --- Blok kode di bawah ini tidak akan terpengaruh dan tetap aman ---
 // --- Blok ini akan dijalankan jika BUKAN permintaan pencarian AJAX ---
