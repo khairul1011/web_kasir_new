@@ -29,6 +29,26 @@ class View
         return $hasil;
     }
 
+     // ==========================================================
+    // TAMBAHKAN FUNGSI BARU INI UNTUK MENGAMBIL DATA NAVBAR
+    // ==========================================================
+    public function getNavbarUserData($userId)
+    {
+        // Panggil fungsi yang sudah ada untuk mengambil data user
+        $userData = $this->user_edit($userId);
+        
+        // Tentukan path foto profil
+        $fotoPath = BASE_URL . '/assets/img/profil/default.png'; // Foto default
+        if (!empty($userData['foto']) && file_exists(APP_ROOT_PATH . '/assets/img/profil/' . $userData['foto'])) {
+            $fotoPath = BASE_URL . '/assets/img/profil/' . $userData['foto'];
+        }
+
+        // Kembalikan semua data yang dibutuhkan dalam satu array
+        return [
+            'data' => $userData,
+            'foto_path' => $fotoPath
+        ];
+    }
     /**
      * Mengambil data pengguna berdasarkan ID untuk proses edit.
      *

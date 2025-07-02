@@ -30,7 +30,7 @@ if (isset($_SESSION['flash_message'])) {
             $foto_path = BASE_URL . '/assets/img/profil/' . $user_foto;
         }
         ?>
-        <img id="image-preview" class="rounded-full w-96 h-96" src="<?php echo $foto_path; ?>" alt="Foto Profil">
+        <img id="image-preview" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover bg-gray-200 dark:bg-gray-700" src="<?php echo $foto_path; ?>" alt="Foto Profil">
 
         <form action="fungsi/edit/edit.php?foto" method="POST" enctype="multipart/form-data" class="mt-auto">
             <input type="hidden" name="id" value="<?php echo $user_id; ?>">
