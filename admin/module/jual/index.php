@@ -37,9 +37,9 @@ if (isset($_SESSION['flash_message'])) {
     </div>
     <div class="rounded-lg shadow-md bg-white dark:bg-gray-800 h-fit">
         <div class="bg-blue-600 text-white px-4 py-3 font-semibold flex items-center rounded-t-lg">Hasil Pencarian</div>
-        <div class="p-4 min-h-[150px]">
+        <div class="p-4 min-h-[150px] rounded-lg">
             <div id="tunggu"></div>
-            <div id="hasil_cari"><p class="text-center text-gray-500 dark:text-gray-400 py-4">Hasil pencarian akan tampil di sini.</p></div>
+            <div id="hasil_cari" class="overflow-x-auto rounded-lg"><p class="text-center text-gray-500 rounded-lg dark:text-gray-400 py-4">Hasil pencarian akan tampil di sini.</p></div>
         </div>
     </div>
 </div>
@@ -50,9 +50,9 @@ if (isset($_SESSION['flash_message'])) {
         <button id="reset-keranjang-btn" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold">RESET</button>
     </div>
     <div class="p-4">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-center text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <div class="overflow-x-auto rounded-lg">
+            <table class="w-full text-sm text-center rounded-lg text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 rounded-lg uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col" class="px-4 py-3">No</th>
                         <th scope="col" class="px-4 py-3 text-left">Nama</th>
@@ -180,16 +180,18 @@ $(document).ready(function(){
         renderCart();
     });
     
-    $(document).on('change', '.cart-item-qty', function() {
+    $(document).on('input', '.cart-item-qty', function() {
         const productId = $(this).data('id');
         const newQuantity = parseInt($(this).val());
+
         if (newQuantity >= 1) {
             cart[productId].quantity = newQuantity;
         } else {
-            // Jika user memasukkan angka kurang dari 1, kembalikan ke 1
+            // If user enters a number less than 1, reset it to 1
             $(this).val(1);
             cart[productId].quantity = 1;
         }
+        // Re-render the cart to update totals
         renderCart();
     });
 

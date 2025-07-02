@@ -20,40 +20,40 @@ if (!empty($_GET['cari_barang'])) {
         $hasil_pencarian = $row->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-4 py-3">Nama Barang</th>
-                    <th scope="col" class="px-4 py-3">Harga</th>
-                    <th scope="col" class="px-4 py-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($hasil_pencarian)):
-                    foreach ($hasil_pencarian as $hasil): ?>
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white product-name">
-                                <?php echo htmlspecialchars($hasil['nama']); ?>
-                            </td>
-                            <td class="px-4 py-3 product-price" data-price="<?php echo $hasil['harga']; ?>">
-                                Rp.<?php echo number_format($hasil['harga']); ?>,-
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button"
-                                    data-produk-id="<?php echo $hasil['id']; ?>"
-                                    class="add-to-cart-btn font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                    + Tambah
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr class="bg-white dark:bg-gray-800">
-                        <td colspan="3" class="px-4 py-3 text-center text-gray-500">Produk tidak ditemukan.</td>
+    <table class="w-full text-sm text-left rounded-lg text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 rounded-lg uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-4 py-3">Nama Barang</th>
+                <th scope="col" class="px-4 py-3">Harga</th>
+                <th scope="col" class="px-4 py-3">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (!empty($hasil_pencarian)):
+                foreach ($hasil_pencarian as $hasil): ?>
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white product-name">
+                            <?php echo htmlspecialchars($hasil['nama']); ?>
+                        </td>
+                        <td class="px-4 py-3 product-price" data-price="<?php echo $hasil['harga']; ?>">
+                            Rp.<?php echo number_format($hasil['harga']); ?>,-
+                        </td>
+                        <td class="px-4 py-3">
+                            <button type="button"
+                                data-produk-id="<?php echo $hasil['id']; ?>"
+                                class="add-to-cart-btn font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                + Tambah
+                            </button>
+                        </td>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr class="bg-white dark:bg-gray-800">
+                    <td colspan="3" class="px-4 py-3 text-center text-gray-500">Produk tidak ditemukan.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 <?php
     }
     exit;
