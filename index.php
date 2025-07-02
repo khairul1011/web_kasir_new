@@ -1,7 +1,13 @@
 <?php
 //Output buffering 
 ob_start();
-// session_start();
+session_start();
+
+// Cek apakah user sudah login. Jika belum, tendang ke halaman login.
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
 
 // Definisi path dasar
 define('APP_ROOT_PATH', __DIR__);

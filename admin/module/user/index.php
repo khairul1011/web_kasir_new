@@ -1,7 +1,10 @@
 <?php
-$user_id = 1; // Ganti dengan logika sesi Anda
+$user_id = $_SESSION['user_id'];
+
+// Ambil data user yang sedang login berdasarkan ID dari session
 $user_data = $view->user_edit($user_id);
 
+// Ambil pesan notifikasi dari session jika ada
 $flash_message = null;
 if (isset($_SESSION['flash_message'])) {
     $flash_message = $_SESSION['flash_message'];

@@ -9,7 +9,7 @@ if (!isset($view)) {
 }
 
 // Asumsi user yang login memiliki ID = 1. Ganti dengan ID dari session.
-$user_id_logged_in = 1;
+$user_id_logged_in = $_SESSION['user_id'];
 
 // Panggil satu fungsi untuk mendapatkan semua data navbar
 $navbar_data = $view->getNavbarUserData($user_id_logged_in);
@@ -50,7 +50,7 @@ $navbar_data = $view->getNavbarUserData($user_id_logged_in);
                 <a href="index.php?page=user" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Profil</a>
               </li>
               <li>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
+                <a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
               </li>
             </ul>
           </div>
