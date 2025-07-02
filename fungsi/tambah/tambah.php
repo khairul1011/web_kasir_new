@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../config.php';
-// session_start();
+session_start();
 
 // Fungsi untuk membersihkan input
 function sanitize_input($data)
@@ -37,7 +37,7 @@ if (isset($_GET['produk'])) {
 // --- PROSES PEMBAYARAN FINAL (DARI HALAMAN JUAL) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['cart_data'])) {
 
-    $user_id = 1; // Sesuaikan dengan sesi login Anda
+    $user_id = $_SESSION['user_id']; // Sesuaikan dengan sesi login Anda
 
     // 1. Ambil data keranjang dari input hidden dan ubah dari JSON ke array PHP
     $cart_json = $_POST['cart_data'];

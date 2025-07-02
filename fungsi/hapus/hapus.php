@@ -72,7 +72,7 @@ class HapusController
 
     public function resetCart()
     {
-        $user_id = 1; // Sesuaikan dengan sesi login Anda
+        $user_id = $_SESSION['user_id']; // Sesuaikan dengan sesi login Anda
         $stmt_items = $this->db->prepare("SELECT qty, produk_id FROM keranjang WHERE user_id = ?");
         $stmt_items->execute([$user_id]);
         $items_to_reset = $stmt_items->fetchAll(PDO::FETCH_ASSOC);

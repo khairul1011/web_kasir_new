@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config.php';
-// session_start();
+session_start();
 
 function sanitize_input($data)
 {
@@ -82,7 +82,7 @@ if (isset($_GET['produk'])) {
 // --- Blok kode di bawah ini tidak akan terpengaruh dan tetap aman ---
 // --- Blok ini akan dijalankan jika BUKAN permintaan pencarian AJAX ---
 
-$user_id = 1;
+$user_id = $_SESSION['user_id'];
 
 // Aksi Update Kuantitas (dari form POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_qty') {
@@ -254,17 +254,33 @@ if (isset($_GET['profil'])) {
 // --- BLOK UNTUK PROSES GANTI PASSWORD ---
 // ==========================================================
 if (isset($_GET['pass'])) {
+    session_start();
+
     $user_id  = (int)sanitize_input($_POST['id']);
     $password = $_POST['pass'];
 
-    // Gunakan password_hash() untuk keamanan yang lebih baik
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Pastikan password baru tidak kosong
+    if (empty($password)) {
+        $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Password baru tidak boleh kosong.'];
+        header('Location: ../../index.php?page=user');
+        exit;
+    }
+
+    // --- PENYESUAIAN DI SINI ---
+    // Gunakan md5() agar konsisten dengan sistem login dan register Anda
+    $hashed_password = md5($password);
 
     $sql = 'UPDATE users SET password=? WHERE id=?';
     $row = $db->prepare($sql);
-    $row->execute([$hashed_password, $user_id]);
 
-    $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Password berhasil diubah!'];
+    try {
+        $row->execute([$hashed_password, $user_id]);
+        $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Password berhasil diubah!'];
+    } catch (PDOException $e) {
+        $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Gagal mengubah password.'];
+        error_log("Password change error: " . $e->getMessage());
+    }
+
     header('Location: ../../index.php?page=user');
     exit;
 }
