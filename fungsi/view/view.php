@@ -29,14 +29,11 @@ class View
         return $hasil;
     }
 
-     // ==========================================================
-    // TAMBAHKAN FUNGSI BARU INI UNTUK MENGAMBIL DATA NAVBAR
-    // ==========================================================
     public function getNavbarUserData($userId)
     {
         // Panggil fungsi yang sudah ada untuk mengambil data user
         $userData = $this->user_edit($userId);
-        
+
         // Tentukan path foto profil
         $fotoPath = BASE_URL . '/assets/img/profil/default.png'; // Foto default
         if (!empty($userData['foto']) && file_exists(APP_ROOT_PATH . '/assets/img/profil/' . $userData['foto'])) {
@@ -49,13 +46,14 @@ class View
             'foto_path' => $fotoPath
         ];
     }
+
     /**
      * Mengambil data pengguna berdasarkan ID untuk proses edit.
      *
      * @param int $id ID pengguna.
      * @return array Hasil query dalam bentuk array asosiatif tunggal.
      */
-// di dalam file fungsi/view/view.php
+    // di dalam file fungsi/view/view.php
 
     public function user_edit($id)
     {
@@ -318,7 +316,7 @@ class View
         exit;
     }
 
-     // --- FUNGSI HALAMAN PRODUK ---
+    // --- FUNGSI HALAMAN PRODUK ---
     public function getBarangPageData($getData)
     {
         // This function now correctly passes the filter to the other functions
@@ -452,5 +450,4 @@ class View
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'];
     }
-    
 }

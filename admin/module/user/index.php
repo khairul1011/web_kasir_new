@@ -37,10 +37,6 @@ if (isset($_SESSION['flash_message'])) {
             <label for="foto-upload" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 mt-4">
                 Pilih File
             </label>
-<!-- 
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
-            <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file"> -->
-
             <input id="foto-upload" name="foto" type="file" class="hidden" />
             <p id="file-name" class="text-sm text-gray-500 dark:text-gray-400 mt-2">Belum ada file dipilih</p>
             <button type="submit" class="mt-4 w-full text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
