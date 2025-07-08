@@ -168,10 +168,10 @@ extract($pageData);
                             <label for="stok" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stok</label>
                             <input type="number" name="stok" id="stok" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Jumlah stok" required="">
                         </div>
-                        <div class="col-span-2 sm:col-span-1">
-                            <label for="kategori" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
+                        <div class="col-span-1 sm:col-span-1">
+                            <label for="kategori" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Pilih Kategori</label>
                             <select name="kategori" id="kategori" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option value="">Pilih Kategori</option>
+                                <option value="">-- Pilih --</option>
                                 <?php foreach ($daftarKategori as $kategori): ?>
                                     <option value="<?php echo htmlspecialchars($kategori['kategori']); ?>">
                                         <?php echo htmlspecialchars($kategori['kategori']); ?>
@@ -179,14 +179,14 @@ extract($pageData);
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="col-span-1 sm:col-span-1">
+                            <label for="kategori_baru" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Atau Kategori Baru</label>
+                            <input type="text" name="kategori_baru" id="kategori_baru" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cth: ATK">
+                        </div>
                         <div class="col-span-2">
                             <label for="deskripsi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deskripsi Produk</label>
                             <textarea name="deskripsi" id="deskripsi" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tulis deskripsi produk di sini"></textarea>
                         </div>
-                        <!-- <div class="col-span-2 sm:col-span-1">
-                            <label for="outlet_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ID Outlet (Opsional)</label>
-                            <input type="number" name="outlet_id" id="outlet_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="ID Outlet">
-                        </div> -->
                     </div>
                     <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -257,63 +257,65 @@ extract($pageData);
         </div>
     </div>
 
-<script>
-$(document).ready(function() {
-    
-    // Fungsi utama untuk memuat data via AJAX
-    function fetchProducts(page = 1, searchQuery = '', filterQuery = '') {
-        const url = `index.php?page=barang&halaman=${page}&cari=${encodeURIComponent(searchQuery)}&filter=${encodeURIComponent(filterQuery)}`;
-        
-        // Jangan tampilkan loading jika event-nya dari 'keyup' agar lebih mulus
-        if (event.type !== 'keyup') {
-            $('#productTableContainer').html('<p class="text-center p-4">Memuat...</p>');
-        }
+    <script>
+        $(document).ready(function() {
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function(response) {
-                $('#productTableContainer').html(response);
-            },
-            error: function() {
-                $('#productTableContainer').html('<p class="text-center p-4 text-red-500">Gagal memuat data.</p>');
+            // Fungsi utama untuk memuat data via AJAX
+            function fetchProducts(page = 1, searchQuery = '', filterQuery = '') {
+                const url = `index.php?page=barang&halaman=${page}&cari=${encodeURIComponent(searchQuery)}&filter=${encodeURIComponent(filterQuery)}`;
+
+                // Jangan tampilkan loading jika event-nya dari 'keyup' agar lebih mulus
+                if (event.type !== 'keyup') {
+                    $('#productTableContainer').html('<p class="text-center p-4">Memuat...</p>');
+                }
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        $('#productTableContainer').html(response);
+                    },
+                    error: function() {
+                        $('#productTableContainer').html('<p class="text-center p-4 text-red-500">Gagal memuat data.</p>');
+                    }
+                });
             }
+
+            // Ambil filter yang sedang aktif dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFilter = urlParams.get('filter') || '';
+            let searchTimeout;
+
+            // --- PERBAIKAN DI SINI: KEMBALI MENGGUNAKAN 'KEYUP' DENGAN DEBOUNCE ---
+            $('#searchInput').on('keyup', function(e) {
+                clearTimeout(searchTimeout);
+                const query = $(this).val();
+
+                // Tunda request selama 300 milidetik setelah user berhenti mengetik
+                searchTimeout = setTimeout(function() {
+                    fetchProducts(1, query, currentFilter);
+                }, 300);
+            });
+
+            // Event listener untuk klik pagination
+            $(document).on('click', '.pagination-link', function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('cursor-not-allowed')) return;
+                fetchProducts($(this).data('page'), $('#searchInput').val(), currentFilter);
+            });
+
+            // Event listener untuk tombol edit
+            $(document).on('click', '.edit-btn', function() {
+                const data = $(this).data();
+                $('#edit-id').val(data.id);
+                $('#edit-nama').val(data.nama);
+                $('#edit-harga').val(data.harga);
+                $('#edit-stok').val(data.stok);
+                $('#edit-kategori').val(data.kategori);
+                $('#edit-deskripsi').val(data.deskripsi);
+            });
         });
-    }
-
-    // Ambil filter yang sedang aktif dari URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentFilter = urlParams.get('filter') || '';
-    let searchTimeout;
-
-    // --- PERBAIKAN DI SINI: KEMBALI MENGGUNAKAN 'KEYUP' DENGAN DEBOUNCE ---
-    $('#searchInput').on('keyup', function(e) {
-        clearTimeout(searchTimeout);
-        const query = $(this).val();
-
-        // Tunda request selama 300 milidetik setelah user berhenti mengetik
-        searchTimeout = setTimeout(function() {
-            fetchProducts(1, query, currentFilter);
-        }, 300);
-    });
-
-    // Event listener untuk klik pagination
-    $(document).on('click', '.pagination-link', function(e) {
-        e.preventDefault();
-        if ($(this).hasClass('cursor-not-allowed')) return;
-        fetchProducts($(this).data('page'), $('#searchInput').val(), currentFilter);
-    });
-
-    // Event listener untuk tombol edit
-    $(document).on('click', '.edit-btn', function() {
-        const data = $(this).data();
-        $('#edit-id').val(data.id);
-        $('#edit-nama').val(data.nama);
-        $('#edit-harga').val(data.harga);
-        $('#edit-stok').val(data.stok);
-        $('#edit-kategori').val(data.kategori);
-        $('#edit-deskripsi').val(data.deskripsi);
-    });
-});
-</script>
+    </script>

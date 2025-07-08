@@ -11,13 +11,20 @@ function sanitize_input($data)
 
 // --- FUNGSI HALAMAN BARANG ---
 // --- TAMBAH PRODUK BARU (DARI HALAMAN BARANG) ---
-if (isset($_GET['produk'])) {
-    $kategori  = sanitize_input($_POST['kategori']);
-    $nama      = sanitize_input($_POST['nama']);
-    $harga     = sanitize_input($_POST['harga']);
-    $stok      = sanitize_input($_POST['stok']);
-    $deskripsi = isset($_POST['deskripsi']) ? sanitize_input($_POST['deskripsi']) : null;
-    $outlet_id = isset($_POST['outlet_id']) ? (int)$_POST['outlet_id'] : null;
+if (isset($_GET['produk'])) { 
+    // Ambil nilai dari dropdown dan input teks
+    $kategori_pilihan = sanitize_input($_POST['kategori']);
+    $kategori_baru    = sanitize_input($_POST['kategori_baru']);
+    
+    // Tentukan kategori mana yang akan digunakan
+    // Prioritaskan input teks baru. Jika kosong, baru gunakan dropdown.
+    $kategori = !empty($kategori_baru) ? $kategori_baru : $kategori_pilihan;
+
+    $nama      = sanitize_input($_POST['nama']);          
+    $harga     = sanitize_input($_POST['harga']);         
+    $stok      = sanitize_input($_POST['stok']);          
+    $deskripsi = isset($_POST['deskripsi']) ? sanitize_input($_POST['deskripsi']) : null; 
+    $outlet_id = isset($_POST['outlet_id']) ? (int)$_POST['outlet_id'] : null; 
 
     $data_produk = [$nama, $kategori, $harga, $stok, $deskripsi, $outlet_id];
     $sql = 'INSERT INTO produk (nama, kategori, harga, stok, deskripsi, outlet_id) VALUES (?, ?, ?, ?, ?, ?)';
