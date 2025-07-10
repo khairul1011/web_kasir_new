@@ -1,8 +1,4 @@
     <?php
-    // admin/template/includes/admin_header.php
-    // Definisi path APP_ROOT_PATH, ADMIN_PATH, MODULE_PATH, INCLUDE_PATH
-    // seharusnya sudah dilakukan di index.php utama.
-    // Tidak perlu mendefinisikan ulang di sini.
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -15,7 +11,7 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <style>
-            /* Custom styles for Inter font */
+          
             body {
                 font-family: 'Inter', sans-serif;
             }

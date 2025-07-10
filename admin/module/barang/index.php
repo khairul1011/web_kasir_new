@@ -1,5 +1,4 @@
 <?php
-// Your clean PHP code at the top remains the same
 if (!isset($view)) {
     require_once __DIR__ . '/../../../config.php';
     require_once __DIR__ . '/../../../fungsi/view/view.php';
@@ -13,13 +12,7 @@ extract($pageData);
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Manajemen Produk</h1>
 </div>
 
-<?php if ($message): ?>
-    <div class="p-4 mb-4 text-sm rounded-lg
-        <?php echo $message_type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'; ?>"
-        role="alert">
-        <span class="font-medium"><?php echo htmlspecialchars($message); ?></span>
-    </div>
-<?php endif; ?>
+
 
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
@@ -104,40 +97,40 @@ extract($pageData);
                 <?php endif; ?>
             </tbody>
         </table>
-    </div>
 
-    <nav aria-label="Page navigation" class="flex justify-center mt-6" id="paginationNav">
-        <ul class="flex items-center -space-x-px h-8 text-sm">
-            <li>
-                <a href="#" data-page="<?php echo max(1, $previous); ?>" class="pagination-link flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white
-                    <?php echo ($halaman <= 1) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''; ?>">
-                    <span class="sr-only">Previous</span>
-                    <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
-                    </svg>
-                </a>
-            </li>
-
-            <?php for ($x = 1; $x <= $total_halaman; $x++): ?>
+        <nav aria-label="Page navigation" class="flex justify-center mt-6" id="paginationNav">
+            <ul class="flex items-center -space-x-px h-8 text-sm">
                 <li>
-                    <a href="#" data-page="<?php echo $x; ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight border border-gray-300
-                    <?php echo ($x === $halaman) ? 'z-10 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'; ?>">
-                        <?php echo $x; ?>
+                    <a href="#" data-page="<?php echo max(1, $previous); ?>" class="pagination-link flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white
+                    <?php echo ($halaman <= 1) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''; ?>">
+                        <span class="sr-only">Previous</span>
+                        <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
+                        </svg>
                     </a>
                 </li>
-            <?php endfor; ?>
 
-            <li>
-                <a href="#" data-page="<?php echo min($total_halaman, $next); ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white
+                <?php for ($x = 1; $x <= $total_halaman; $x++): ?>
+                    <li>
+                        <a href="#" data-page="<?php echo $x; ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight border border-gray-300
+                    <?php echo ($x === $halaman) ? 'z-10 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'; ?>">
+                            <?php echo $x; ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <li>
+                    <a href="#" data-page="<?php echo min($total_halaman, $next); ?>" class="pagination-link flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white
                     <?php echo ($halaman >= $total_halaman || $total_halaman == 0) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''; ?>">
-                    <span class="sr-only">Next</span>
-                    <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
-                    </svg>
-                </a>
-            </li>
-        </ul>
-    </nav>
+                        <span class="sr-only">Next</span>
+                        <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 
     <!-- Modal Tambah Produk -->
     <div id="crud-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-auto max-h-[90vh]">
@@ -283,13 +276,12 @@ extract($pageData);
                     }
                 });
             }
-
-            // Ambil filter yang sedang aktif dari URL
+  
             const urlParams = new URLSearchParams(window.location.search);
             const currentFilter = urlParams.get('filter') || '';
             let searchTimeout;
 
-            // --- PERBAIKAN DI SINI: KEMBALI MENGGUNAKAN 'KEYUP' DENGAN DEBOUNCE ---
+            
             $('#searchInput').on('keyup', function(e) {
                 clearTimeout(searchTimeout);
                 const query = $(this).val();
@@ -300,14 +292,13 @@ extract($pageData);
                 }, 300);
             });
 
-            // Event listener untuk klik pagination
-            $(document).on('click', '.pagination-link', function(e) {
+          
+            $(document).on('click', '#productTableContainer .pagination-link', function(e) {
                 e.preventDefault();
-                if ($(this).hasClass('cursor-not-allowed')) return;
+                // ... sisa kode tidak berubah ...
                 fetchProducts($(this).data('page'), $('#searchInput').val(), currentFilter);
             });
 
-            // Event listener untuk tombol edit
             $(document).on('click', '.edit-btn', function() {
                 const data = $(this).data();
                 $('#edit-id').val(data.id);

@@ -3,22 +3,81 @@ class View
 {
     protected $db;
 
-    /**
-     * Constructor untuk kelas View.
-     * Menginisialisasi koneksi database.
-     *
-     * @param PDO $db Objek PDO yang sudah terkoneksi ke database.
-     */
     public function __construct($db)
     {
         $this->db = $db;
     }
 
-    /**
-     * Mengambil semua data pengguna (users).
-     *
-     * @return array Hasil query dalam bentuk array.
-     */
+     public function getDashboardData()
+    {
+        // Data untuk hari ini
+        $today = date('Y-m-d');
+        
+        // 1. Produk Terjual Hari Ini (Total kuantitas)
+        $sql_produk_today = "SELECT SUM(dt.qty) as total 
+                             FROM detail_transaksi dt
+                             JOIN transaksi t ON dt.transaksi_id = t.id
+                             WHERE DATE(t.tanggal) = ?";
+        $stmt_produk_today = $this->db->prepare($sql_produk_today);
+        $stmt_produk_today->execute([$today]);
+        $produk_terjual_hari_ini = $stmt_produk_today->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+        // 2. Pendapatan Hari Ini (Total omzet)
+        $sql_omzet_today = "SELECT SUM(total) as total FROM transaksi WHERE DATE(tanggal) = ?";
+        $stmt_omzet_today = $this->db->prepare($sql_omzet_today);
+        $stmt_omzet_today->execute([$today]);
+        $pendapatan_hari_ini = $stmt_omzet_today->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+        // 3. Pendapatan Bulan Ini (Total omzet)
+        $current_month = date('Y-m');
+        $sql_omzet_month = "SELECT SUM(total) as total FROM transaksi WHERE DATE_FORMAT(tanggal, '%Y-%m') = ?";
+        $stmt_omzet_month = $this->db->prepare($sql_omzet_month);
+        $stmt_omzet_month->execute([$current_month]);
+        $pendapatan_bulan_ini = $stmt_omzet_month->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+        // Kembalikan semua data dalam satu array
+        return [
+            'produk_terjual_hari_ini' => (int)$produk_terjual_hari_ini,
+            'pendapatan_hari_ini' => (float)$pendapatan_hari_ini,
+            'pendapatan_bulan_ini' => (float)$pendapatan_bulan_ini
+        ];
+    }
+
+     public function getChartData()
+    {
+        // Siapkan array untuk 7 hari terakhir
+        $labels = [];
+        $revenueData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $labels[] = date('d M', strtotime($date)); // Format label '01 Jul'
+            $revenueData[$date] = 0; // Inisialisasi pendapatan hari itu dengan 0
+        }
+
+        // Ambil total pendapatan per hari dari database untuk 7 hari terakhir
+        $sql = "SELECT DATE(tanggal) as tanggal_transaksi, SUM(total) as total_harian
+                FROM transaksi
+                WHERE tanggal >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                GROUP BY DATE(tanggal)";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $daily_totals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Isi array pendapatan dengan data dari database
+        foreach ($daily_totals as $row) {
+            if (isset($revenueData[$row['tanggal_transaksi']])) {
+                $revenueData[$row['tanggal_transaksi']] = (float)$row['total_harian'];
+            }
+        }
+
+        // Kembalikan data dalam format yang siap digunakan oleh ApexCharts
+        return [
+            'labels' => array_values($labels),
+            'revenue' => array_values($revenueData)
+        ];
+    }
+
     public function users()
     {
         // Sesuaikan dengan nama tabel 'users' di database Anda
@@ -47,17 +106,8 @@ class View
         ];
     }
 
-    /**
-     * Mengambil data pengguna berdasarkan ID untuk proses edit.
-     *
-     * @param int $id ID pengguna.
-     * @return array Hasil query dalam bentuk array asosiatif tunggal.
-     */
-    // di dalam file fungsi/view/view.php
-
     public function user_edit($id)
     {
-        // Pastikan query ini mengambil semua kolom yang diperlukan, TERMASUK 'foto'
         $sql = "SELECT username, nama, email, nohp, alamat, foto FROM users WHERE id = ?";
         $row = $this->db->prepare($sql);
         $row->execute(array($id));
@@ -82,118 +132,7 @@ class View
         return $hasil;
     }
 
-    // --- FUNGSI HALAMAN TRANSAKSI ---
-
-    /**
-     * Mengambil item-item di keranjang untuk user tertentu.
-     * Join dengan tabel produk untuk detail produk.
-     *
-     * @param int $user_id ID user/kasir yang sedang login.
-     * @return array Daftar item di keranjang.
-     */
-    public function get_keranjang_items($user_id)
-    {
-        $sql = "SELECT k.id AS keranjang_id, k.produk_id, k.qty,
-                       p.nama AS nama_produk, p.harga AS harga_produk, p.stok AS stok_produk
-                FROM keranjang k
-                JOIN produk p ON k.produk_id = p.id
-                WHERE k.user_id = ?";
-        $row = $this->db->prepare($sql);
-        $row->execute([$user_id]);
-        $hasil = $row->fetchAll();
-        return $hasil;
-    }
-
-    /**
-     * Menghitung total harga di keranjang untuk user tertentu.
-     *
-     * @param int $user_id ID user/kasir yang sedang login.
-     * @return float|int Total harga di keranjang.
-     */
-    public function get_keranjang_total($user_id)
-    {
-        $sql = "SELECT SUM(k.qty * p.harga) AS total_keranjang
-                FROM keranjang k
-                JOIN produk p ON k.produk_id = p.id
-                WHERE k.user_id = ?";
-        $row = $this->db->prepare($sql);
-        $row->execute([$user_id]);
-        $hasil = $row->fetch();
-        return $hasil['total_keranjang'] ?? 0;
-    }
-
-    /**
-     * Mengambil semua data pelanggan.
-     * @return array Daftar pelanggan.
-     */
-    public function get_all_pelanggan()
-    {
-        $sql = "SELECT * FROM pelanggan ORDER BY nama ASC";
-        $row = $this->db->prepare($sql);
-        $row->execute();
-        $hasil = $row->fetchAll();
-        return $hasil;
-    }
-
-    /**
-     * Mengambil detail transaksi berdasarkan ID transaksi.
-     *
-     * @param int $transaksi_id ID transaksi.
-     * @return array Detail transaksi.
-     */
-    public function get_detail_transaksi($transaksi_id)
-    {
-        $sql = "SELECT dt.id, dt.qty, dt.subtotal,
-                       p.nama AS nama_produk, p.harga AS harga_satuan
-                FROM detail_transaksi dt
-                JOIN produk p ON dt.produk_id = p.id
-                WHERE dt.transaksi_id = ?";
-        $row = $this->db->prepare($sql);
-        $row->execute([$transaksi_id]);
-        $hasil = $row->fetchAll();
-        return $hasil;
-    }
-
-    public function generate_search_result_html($keyword = '')
-    {
-        if (!empty($keyword)) {
-            $stmt = $this->db->prepare("SELECT id, nama, harga FROM produk WHERE (nama LIKE ? OR id LIKE ?) AND stok > 0");
-            $search_keyword = '%' . $keyword . '%';
-            $stmt->execute([$search_keyword, $search_keyword]);
-        } else {
-            $stmt = $this->db->prepare("SELECT id, nama, harga FROM produk WHERE stok > 0 LIMIT 10");
-            $stmt->execute();
-        }
-        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $html_output = '';
-
-        if (!empty($products)) {
-            foreach ($products as $produk) {
-                $html_output .= '<tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">';
-                $html_output .= '  <td class="px-2 py-2 font-medium text-gray-900 dark:text-white">' . htmlspecialchars($produk['nama']) . '</td>';
-                $html_output .= '  <td class="px-2 py-2">Rp ' . number_format($produk['harga'], 0, ',', '.') . '</td>';
-                $html_output .= '  <td class="px-2 py-2">';
-
-                // ==========================================================
-                // PERBAIKAN DI BARIS INI: action diubah ke 'fungsi/tambah/tambah.php'
-                // ==========================================================
-                $html_output .= '      <form method="POST" action="fungsi/tambah/tambah.php">';
-
-                $html_output .= '          <input type="hidden" name="action" value="add_to_cart">';
-                $html_output .= '          <input type="hidden" name="produk_id" value="' . $produk['id'] . '">';
-                $html_output .= '          <button type="submit" class="font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm">+ Tambah</button>';
-                $html_output .= '      </form>';
-                $html_output .= '  </td>';
-                $html_output .= '</tr>';
-            }
-        } else {
-            $html_output = '<tr><td colspan="3" class="py-4 text-center text-gray-500 dark:text-gray-400">Produk tidak ditemukan.</td></tr>';
-        }
-
-        return $html_output;
-    }
-
+    // --- FUNGSI HALAMAN LAPORAN ---
     public function getLaporanData($filters = [])
     {
         $sql = "SELECT 
@@ -360,11 +299,7 @@ class View
         ];
     }
 
-    /**
-     * Mengambil semua data produk.
-     *
-     * @return array Hasil query dalam bentuk array.
-     */
+
     public function produk()
     {
         // Sesuaikan dengan nama tabel 'produk' di database Anda
@@ -376,15 +311,6 @@ class View
         return $hasil;
     }
 
-    /**
-     * Mengambil semua data produk dengan pagination dan pencarian.
-     * Digunakan juga di halaman transaksi untuk mencari produk.
-     *
-     * @param int $limit Jumlah produk per halaman.
-     * @param int $offset Offset (mulai dari item ke berapa).
-     * @param string|null $cari Kata kunci pencarian opsional.
-     * @return array Hasil query dalam bentuk array.
-     */
     public function produk_pagination_with_search($batas, $halaman_awal, $keyword = null, $filter = null)
     {
         $sql = "SELECT * FROM produk";
@@ -419,12 +345,6 @@ class View
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Menghitung total jumlah produk untuk keperluan pagination dan pencarian.
-     *
-     * @param string|null $cari Kata kunci pencarian opsional.
-     * @return int Total jumlah produk.
-     */
     public function produk_row_count_total_with_search($keyword = null, $filter = null)
     {
         $sql = "SELECT COUNT(*) as total FROM produk";

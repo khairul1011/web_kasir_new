@@ -1,17 +1,15 @@
 <?php
-// admin/template/includes/admin_navbar.php
 
-// Pastikan variabel $view sudah tersedia
 if (!isset($view)) {
   require_once __DIR__ . '/../../../../config.php';
   require_once __DIR__ . '/../../../../fungsi/view/view.php';
   $view = new View($db);
 }
 
-// Asumsi user yang login memiliki ID = 1. Ganti dengan ID dari session.
+
 $user_id_logged_in = $_SESSION['user_id'];
 
-// Panggil satu fungsi untuk mendapatkan semua data navbar
+
 $navbar_data = $view->getNavbarUserData($user_id_logged_in);
 ?>
 <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">

@@ -1,24 +1,4 @@
-<?php
-$flash_message = null;
-if (isset($_SESSION['flash_message'])) {
-    $flash_message = $_SESSION['flash_message'];
-    // Hapus pesan dari session agar tidak tampil lagi
-    unset($_SESSION['flash_message']);
-}
-?>
-
 <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Kasir Penjualan</h1>
-
-<?php if ($flash_message): ?>
-<div class="p-4 mb-4 text-sm rounded-lg 
-    <?php echo $flash_message['type'] === 'success' 
-        ? 'bg-green-100 text-green-800 dark:bg-gray-800 dark:text-green-400' 
-        : 'bg-red-100 text-red-800 dark:bg-gray-800 dark:text-red-400'; 
-    ?>" 
-    role="alert">
-  <span class="font-medium"><?php echo htmlspecialchars($flash_message['message']); ?></span>
-</div>
-<?php endif; ?>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="rounded-lg shadow-md bg-white dark:bg-gray-800 h-fit">
@@ -113,7 +93,6 @@ $(document).ready(function(){
                 item.subtotal = item.price * item.quantity;
                 totalSemua += item.subtotal;
 
-                // String HTML ini sekarang memiliki class CSS Flowbite yang benar
                 const rowHtml = `
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" data-id="${productId}">
                         <td class="px-4 py-3">${no++}</td>
@@ -132,8 +111,7 @@ $(document).ready(function(){
             $('#bayar-btn').prop('disabled', false);
         }
         $('#total-display').val('Rp ' + new Intl.NumberFormat('id-ID').format(totalSemua));
-        // Perbarui juga nilai input hidden untuk total
-        $('input[name="cart_data"]').closest('form').find('input#total-hidden').remove(); // Hapus jika ada
+        $('input[name="cart_data"]').closest('form').find('input#total-hidden').remove(); 
         $('input[name="cart_data"]').closest('form').append(`<input type="hidden" id="total-hidden" value="${totalSemua}">`);
         calculateChange();
     }
@@ -187,11 +165,9 @@ $(document).ready(function(){
         if (newQuantity >= 1) {
             cart[productId].quantity = newQuantity;
         } else {
-            // If user enters a number less than 1, reset it to 1
             $(this).val(1);
             cart[productId].quantity = 1;
         }
-        // Re-render the cart to update totals
         renderCart();
     });
 

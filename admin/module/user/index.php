@@ -1,24 +1,9 @@
 <?php
 $user_id = $_SESSION['user_id'];
-
-// Ambil data user yang sedang login berdasarkan ID dari session
 $user_data = $view->user_edit($user_id);
-
-// Ambil pesan notifikasi dari session jika ada
-$flash_message = null;
-if (isset($_SESSION['flash_message'])) {
-    $flash_message = $_SESSION['flash_message'];
-    unset($_SESSION['flash_message']);
-}
 ?>
 
 <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Profil Pengguna Aplikasi</h1>
-
-<?php if ($flash_message): ?>
-    <div class="p-4 mb-4 text-sm rounded-lg <?php echo $flash_message['type'] === 'success' ? 'bg-green-100 text-green-800 dark:bg-gray-800 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-gray-800 dark:text-red-400'; ?>" role="alert">
-        <span class="font-medium"><?php echo htmlspecialchars(ucfirst($flash_message['type'])); ?>:</span> <?php echo htmlspecialchars($flash_message['message']); ?>
-    </div>
-<?php endif; ?>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center flex flex-col">
@@ -100,7 +85,6 @@ if (isset($_SESSION['flash_message'])) {
 </div>
 
 <script>
-    // Script untuk menampilkan preview gambar dan nama file
     document.getElementById('foto-upload').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {

@@ -5,10 +5,10 @@ if (!isset($view)) {
     $view = new View($db);
 }
 
-// --- PANGGIL FUNGSI UNTUK MENGAMBIL DATA ---
+
 $laporan_data = $view->getLaporanData($_GET);
 
-// --- Tentukan Judul Periode Laporan ---
+
 $periode_laporan = "Keseluruhan";
 if (!empty($_GET['bulan']) && !empty($_GET['tahun'])) {
     $nama_bulan = date("F", mktime(0, 0, 0, (int)$_GET['bulan'], 10));
@@ -17,7 +17,7 @@ if (!empty($_GET['bulan']) && !empty($_GET['tahun'])) {
     $periode_laporan = "Tanggal " . date("d F Y", strtotime($_GET['hari']));
 }
 
-// --- KALKULASI TOTAL ---
+
 $total_terjual_item = array_sum(array_column($laporan_data, 'jumlah'));
 $total_terjual_rp = array_sum(array_column($laporan_data, 'total'));
 ?>
